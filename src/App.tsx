@@ -1,18 +1,18 @@
 import './App.css'
-import ErorLeyout from './assets/leyout/ErorLeyout'
-import LandingLeyout from './assets/leyout/LandingLeyout'
-import LoginLayout from './assets/leyout/LoginLayout'
-import PanleLeyout from './assets/leyout/panleLeyout'
+import ErorLeyout from './leyout/ErorLeyout'
+import LandingLeyout from './leyout/LandingLeyout'
+import LoginLayout from './leyout/LoginLayout'
+import PanleLeyout from './leyout/panleLeyout'
 import Login from './pages/login/Login'
 
 function App() {
 
   return (
    <div>
-    <PanleLeyout/>
+    {/* <PanleLeyout/> */}
 {/* <LandingLeyout /> */}
 {/* <LoginLayout/> */}
-{/* <ErorLeyout/> */}
+<ErorLeyout/>
 
    </div>
   )
