@@ -9,7 +9,7 @@ function App() {
 
   return (
    <div>
-    {/* <PanleLeyout/> */}
+    <PanleLeyout/>
 {/* <LandingLeyout /> */}
 {/* <LoginLayout/> */}
 {/* <ErorLeyout/> */}

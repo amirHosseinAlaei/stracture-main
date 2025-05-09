@@ -3,53 +3,59 @@ import {
   LaptopOutlined,
   NotificationOutlined,
   UserOutlined,
+  LogoutOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Drawer, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Drawer, Layout, Menu, theme, Button, Dropdown } from "antd";
 
 const { Content, Sider } = Layout;
 
-const items2: MenuProps["items"] = [
+// *menu-items
+const item: MenuProps["items"] = [
   {
     key: "sub1",
     icon: React.createElement(UserOutlined),
-    label: "subnav 1",
+    label: "زیرمنو ۱",
     children: [
-      { key: "1", label: "option1" },
-      { key: "2", label: "option2" },
-      { key: "3", label: "option3" },
-      { key: "4", label: "option4" },
+      { key: "1", label: "گزینه ۱" },
+      { key: "2", label: "گزینه ۲" },
+      { key: "3", label: "گزینه ۳" },
+      { key: "4", label: "گزینه ۴" },
     ],
   },
   {
     key: "sub2",
     icon: React.createElement(LaptopOutlined),
-    label: "subnav 2",
+    label: "زیرمنو ۲",
     children: [
-      { key: "5", label: "option5" },
-      { key: "6", label: "option6" },
-      { key: "7", label: "option7" },
-      { key: "8", label: "option8" },
+      { key: "5", label: "گزینه ۵" },
+      { key: "6", label: "گزینه ۶" },
+      { key: "7", label: "گزینه ۷" },
+      { key: "8", label: "گزینه ۸" },
     ],
   },
   {
     key: "sub3",
     icon: React.createElement(NotificationOutlined),
-    label: "subnav 3",
+    label: "زیرمنو ۳",
     children: [
-      { key: "9", label: "option9" },
-      { key: "10", label: "option10" },
-      { key: "11", label: "option11" },
-      { key: "12", label: "option12" },
+      { key: "9", label: "گزینه ۹" },
+      { key: "10", label: "گزینه ۱۰" },
+      { key: "11", label: "گزینه ۱۱" },
+      { key: "12", label: "گزینه ۱۲" },
     ],
   },
 ];
 
 const PanelLayout: React.FC = () => {
+  // open-drop-menu
   const [openKeys, setOpenKeys] = useState<string[]>(
     window.innerWidth >= 992 ? ["sub1"] : []
   );
+  // select key
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
+  // isDrawerOpen (mobile)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const onOpen = () => {
@@ -64,16 +70,88 @@ const PanelLayout: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  //  btns-click 
+  const handleProfile = () => {
+    alert("صفحه حساب کاربری");
+  };
+  const handleLogout = () => {
+    alert("خروج از حساب");
+  };
+
+  // Dropdown menu for md => lg
+  const profileMenu = (
+    // user-menu-papap
+    <Menu
+      items={[
+        {
+          key: "profile",
+          icon: <UserOutlined />,
+          label: "حساب کاربری",
+          onClick: handleProfile,
+        },
+        {
+          key: "logout",
+          icon: <LogoutOutlined style={{ color: "red" }} />,
+          label: <span style={{ color: "red" }}>خروج</span>,
+          onClick: handleLogout,
+        },
+      ]}
+    />
+  );
+
+// user-log-reusebale
+  const AccountButtons = (
+    <div className="flex flex-col items-center pt-6 pb-3 border-b border-b-[#eee] bg-white">
+      <Button className=""
+        type="text"
+        icon={<UserOutlined />}
+        style={{ width: "90%", justifyContent: "start" }}
+        onClick={handleProfile}
+      >
+        حساب کاربر
+      </Button>
+      <Button
+        type="text"
+        icon={<LogoutOutlined />}
+        style={{
+          width: "90%",
+          justifyContent: "start",
+          color: "red",
+        }}
+        onClick={handleLogout}
+      >
+        خروج
+      </Button>
+    </div>
+  );
+
   return (
-    <Layout className="h-screen" style={{ direction: "rtl" }}>
+    <Layout
+      className="h-screen"
+      style={{
+        direction: "rtl",
+        fontFamily: "Vazirmatn, Tahoma, Arial, sans-serif",
+      }}
+    >
       <Layout>
-        {/* Desktop sidebar */}
+        {/* sidebar */}
         <Sider
           width={200}
           style={{ background: colorBgContainer }}
           breakpoint="lg"
           className="transition-all hidden md:block duration-300"
         >
+          <div className="hidden lg:flex">{AccountButtons} </div>
+          <div className="hidden md:flex lg:hidden justify-center pt-6 pb-3 border-b border-b-[#eee] bg-white">
+            <Dropdown overlay={profileMenu} trigger={['click']}>
+              <Button
+                type="text"
+                icon={<UserOutlined />}
+                style={{ fontSize: 22 }}
+              />
+            </Dropdown>
+          </div>
+          {/* menue */}
           <Menu
             mode="inline"
             selectedKeys={selectedKeys}
@@ -81,18 +159,20 @@ const PanelLayout: React.FC = () => {
             onOpenChange={(keys) => setOpenKeys(keys)}
             onClick={({ key }) => setSelectedKeys([key])}
             style={{ height: "100%", borderRight: 0 }}
-            items={items2}
+            items={item}
           />
         </Sider>
 
-        {/* Mobile drawer */}
+        {/*   sidebar-mobile (Drawer) */}
         <Drawer
-title="asd"      
-          placement="right" // تغییر به سمت راست
+          title="منو"
+          placement="right"
           onClose={onClose}
           open={isDrawerOpen}
           bodyStyle={{ padding: 0 }}
         >
+          {/*  Drawer mobile menu*/}
+          {AccountButtons}
           <Menu
             mode="inline"
             selectedKeys={selectedKeys}
@@ -100,30 +180,35 @@ title="asd"
             onOpenChange={(keys) => setOpenKeys(keys)}
             onClick={({ key }) => {
               setSelectedKeys([key]);
-              onClose(); // بستن Drawer بعد از انتخاب گزینه
+              onClose();
             }}
             style={{ height: "100%", borderRight: 0 }}
-            items={items2}
+            items={item}
           />
         </Drawer>
-
         <Layout style={{ padding: "0 24px 24px" }}>
           <div className="flex jc gap-4 items-center">
-            {/* Mobile sidebar button */}
+            {/* btn open drawer mobile */}
             <button
               onClick={onOpen}
               className="!rounded-md hover:text-blue-00 duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
             >
-              <UserOutlined className="text-lg" />
+              <MenuOutlined className="text-lg" />
             </button>
             <div>
               <Breadcrumb
-                items={[{ title: "Home" }, { title: "List" }, { title: "App" }]}
+                items={[
+                  { title: "خانه" },
+                  { title: "لیست" },
+                  { title: "اپلیکیشن" },
+                ]}
                 style={{ margin: "16px 0" }}
               />
             </div>
           </div>
 
+
+{/* Content layout */}
           <Content
             style={{
               padding: 24,
@@ -133,7 +218,8 @@ title="asd"
               borderRadius: borderRadiusLG,
             }}
           >
-            Content
+            
+            محتوا
           </Content>
         </Layout>
       </Layout>
