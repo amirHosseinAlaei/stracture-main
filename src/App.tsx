@@ -12,7 +12,7 @@ function App() {
     {/* <PanleLeyout/> */}
 {/* <LandingLeyout /> */}
 {/* <LoginLayout/> */}
-<ErorLeyout/>
+{/* <ErorLeyout/> */}
 
    </div>
   )

@@ -1,57 +1,57 @@
+import { UserOutlined, LockOutlined,  ArrowLeftOutlined } from "@ant-design/icons";
 import { Form, Input, Button } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
-function LoginLayout() {
-  const onFinish = (values: any) => {
-    console.log("Received values of form: ", values);
+const RegisterLayout = () => {
+  const onFinish = (values) => {
+    console.log("formFinish", values);
   };
 
-  const formItemStyle = { marginBottom: 8 };
-
   return (
-    <div className="h-screen flex justify-center items-center bg-[#f0f2f5]">
-      <div className="bg-white p-6 rounded-lg shadow-lg ">
-        <Form
-          name="login_form"
-          layout="vertical"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            label="ایمیل"
-            name="email"
-            required={false}
-            colon={false}
-            rules={[
-              { required: true, message: "لطفا ایمیل خود را وارد کنید!" },
-              { type: "email", message: "لطفا یک ایمیل معتبر وارد کنید!" },
-            ]}
-            style={formItemStyle}
-          >
-            <Input prefix={<UserOutlined />} placeholder="ایمیل" />
-          </Form.Item>
-          <Form.Item
-            label="رمز عبور"
-            name="password"
-            required={false}
-            colon={false}
-            rules={[
-              { required: true, message: "لطفا رمز عبور خود را وارد کنید!" },
-            ]}
-            style={formItemStyle}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="رمز عبور" />
-          </Form.Item>
+    <div className="min-h-screen bg-gray-100 flex sm:items-center sm:justify-center">
+      {/* Responsive layout */}
+      <div className="w-full h-screen sm:h-auto flex items-center justify-center sm:bg-transparent bg-white sm:shadow-none shadow sm:p-0 p-4">
+        {/* forms */}
+        <div className="w-full sm:w-[400px] bg-white sm:rounded-lg sm:shadow-lg p-6 sm:p-8 flex flex-col justify-center">
+          <div className="flex items-center  justify-between text-x font-bold px-2 mb-10">
+            <div>ورود</div>
+            <button
+  className="p-2 rounded  !duration-300 border-none bg-transparent hover:text-slate-600  cursor-pointer focus:outline-none"
+>
+  <ArrowLeftOutlined className="text-lg" />
+</button>
 
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block>
-              ورود
-            </Button>
-          </Form.Item>
-        </Form>
+          </div>
+          <Form
+            name="register"
+            layout="vertical"
+            onFinish={onFinish}
+            className="w-full"
+            requiredMark={false}
+          >
+            <Form.Item
+              label="نام کاربری"
+              name="username"
+              rules={[{ required: true, message: "لطفاً نام کاربری را وارد کنید!" }]}
+            >
+              <Input suffix={<UserOutlined />} />
+            </Form.Item>
+            <Form.Item
+              label="رمز عبور"
+              name="password"
+              rules={[{ required: true, message: "لطفاً رمز عبور را وارد کنید!" }]}
+            >
+              <Input.Password suffix={<LockOutlined />} />
+            </Form.Item>
+            <Form.Item className="!p-2 ">
+              <Button   type="primary" htmlType="submit" className="w-full   !p-6">
+                ثبت‌ نام
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
     </div>
   );
-}
+};
 
-export default LoginLayout;
+export default RegisterLayout;
