@@ -1,4 +1,5 @@
 import { Layout, Button, Space } from "antd";
+import { Outlet } from "react-router-dom";
 
 const { Header, Content, Footer } = Layout;
 
@@ -22,8 +23,9 @@ function LandingLayout() {
 
       {/* Main Content */}
       <Content className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center">
+
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          هدر متن 
+          <Outlet/>
         </h1>
         <p className="text-lg text-gray-600">
           پاراگراف متن

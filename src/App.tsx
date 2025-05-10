@@ -1,20 +1,11 @@
+import {  RouterProvider } from 'react-router-dom'
 import './App.css'
-import ErorLeyout from './leyout/ErorLeyout'
-import LandingLeyout from './leyout/LandingLeyout'
-import LoginLayout from './leyout/LoginLayout'
-import PanleLeyout from './leyout/panleLeyout'
-import Login from './pages/login/Login'
+import routes from './Routes/routes'
 
 function App() {
 
   return (
-   <div>
-    <PanleLeyout/>
-{/* <LandingLeyout /> */}
-{/* <LoginLayout/> */}
-{/* <ErorLeyout/> */}
-
-   </div>
+<RouterProvider   router={routes} />
   )
 }
 
