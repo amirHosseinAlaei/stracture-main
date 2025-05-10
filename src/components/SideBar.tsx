@@ -12,33 +12,19 @@ const items: MenuProps["items"] = [
 {
 key: "sub1",
 icon: React.createElement(UserOutlined),
-label: "زیرمنو ۱",
-children: [
-{ key: "1", label: "گزینه ۱" },
-{ key: "2", label: "گزینه ۲" },
-{ key: "3", label: "گزینه ۳" },
-{ key: "4", label: "گزینه ۴" },
-],
+label:  "s"  ,
 },
 {
 key: "sub2",
 icon: React.createElement(LaptopOutlined),
 label: "زیرمنو ۲",
-children: [
-{ key: "5", label: "گزینه ۵" },
-{ key: "6", label: "گزینه ۶" },
-{ key: "7", label: "گزینه ۷" },
-{ key: "8", label: "گزینه ۸" },
-],
+
 },
 {
 key: "sub3",
 icon: React.createElement(NotificationOutlined),
 label: "زیرمنو ۳",
 children: [
-{ key: "9", label: "گزینه ۹" },
-{ key: "10", label: "گزینه ۱۰" },
-{ key: "11", label: "گزینه ۱۱" },
 { key: "12", label: "گزینه ۱۲" },
 ],
 },
@@ -83,7 +69,7 @@ onClick: handleLogout,
 );
 
 const AccountButtons = (
-<div className="flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
+<div className=" hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
 <Button
 type="text"
 icon={<UserOutlined />}
@@ -109,7 +95,7 @@ return (
 
 {/* فقط برای حالت غیر دسکتاپ */}
 {!isMobile && (
-<div className="!hidden !md:flex !lg:hidden justify-center pt-6 pb-3 border-b border-b-[#eee] bg-white">
+<div className="hidden md:flex lg:hidden justify-center pt-6 pb-3 border-b border-b-[#eee] bg-white">
 <Dropdown overlay={profileMenu} trigger={["click"]}>
 <Button type="text" icon={<UserOutlined />} style={{ fontSize: 22 }} />
 </Dropdown>
