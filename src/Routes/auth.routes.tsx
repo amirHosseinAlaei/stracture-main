@@ -1,27 +1,26 @@
 import { lazy, Suspense } from "react";
-import PanelLayout from "../leyout/PanleLeyout";
+import LoginLayout from "../assets/leyout/LoginLayout";
 import Loading from "../components/commoen/Loading";
-
-const Forms = lazy(() => import("../components/commoen/Forms"));
+const Login = lazy(() => import("../pages/authentication/Login"));
 const Suspenswrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   return <Suspense fallback={<Loading />}>{children}</Suspense>;
 };
 
-const PanelRoutes = {
-  path: "/panle",
-  element: <PanelLayout />,
+const LoginRoutes = {
+  path: "/auth",
+  element: <LoginLayout />,
   children: [
     {
-      path: "",
+      path: "/auth/login",
       element: (
         <Suspenswrapper>
-          <Forms />
+          <Login />
         </Suspenswrapper>
       ),
     },
   ],
 };
 
-export default PanelRoutes;
+export default LoginRoutes;
