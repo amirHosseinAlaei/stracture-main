@@ -2,6 +2,7 @@ import { Layout, Button, Space } from "antd";
 import { Outlet } from "react-router-dom";
 const { Header, Content, Footer } = Layout;
 // header and footer is fixe and content => outlet
+
 interface LandingLayoutProps {}
 const LandingLayout: React.FC<LandingLayoutProps> = () => {
   return (

@@ -1,130 +1,76 @@
-import React, { useState } from "react";
-import { Layout, Breadcrumb, Drawer, Button } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
-import SidebarContent from "../components/SideBar";
-import { Outlet } from "react-router-dom";
+import React from 'react';
+import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Breadcrumb, Layout, Menu, theme } from 'antd';
 
-const { Content, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
-interface PanelLayoutProps {}
+const items1: MenuProps['items'] = ['1', '2', '3'].map((key) => ({
+  key,
+  label: `nav ${key}`,
+}));
 
-interface SidebarContentProps {
-  openKeys: string[];
-  setOpenKeys: (keys: string[]) => void;
-  selectedKeys: string[];
-  setSelectedKeys: (keys: string[]) => void;
-  handleProfile: () => void;
-  handleLogout: () => void;
-  isMobile?: boolean;
-  onClose?: () => void;
-}
+const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
+  (icon, index) => {
+    const key = String(index + 1);
 
-const PanelLayout: React.FC<PanelLayoutProps> = () => {
-  // تعریف state ها با تایپ‌های مشخص
-  const [openKeys, setOpenKeys] = useState<string[]>(
-    window.innerWidth >= 992 ? ["sub1"] : []
-  );
-  
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
-  
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+    return {
+      key: `sub${key}`,
+      icon: React.createElement(icon),
+      label: `subnav ${key}`,
+      children: Array.from({ length: 4 }).map((_, j) => {
+        const subKey = index * 4 + j + 1;
+        return {
+          key: subKey,
+          label: `option${subKey}`,
+        };
+      }),
+    };
+  },
+);
 
-  // تعریف توابع با تایپ‌های مشخص
-  const onOpen = (): void => {
-    setIsDrawerOpen(true);
-  };
-
-  const onClose = (): void => {
-    setIsDrawerOpen(false);
-  };
-
-  const handleProfile = (): void => {
-    alert("صفحه حساب کاربری");
-  };
-  
-  const handleLogout = (): void => {
-    alert("خروج از حساب");
-  };
+const App: React.FC = () => {
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
 
   return (
-    <Layout
-      className="h-screen"
-      style={{
-        direction: "rtl",
-        fontFamily: "Vazirmatn, Tahoma, Arial, sans-serif",
-      }}
-    >
+    <Layout>
+      <Header style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="demo-logo" />
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          defaultSelectedKeys={['2']}
+          items={items1}
+          style={{ flex: 1, minWidth: 0 }}
+        />
+      </Header>
       <Layout>
-        {/* سایدبار */}
-        <Sider
-          width={200}
-          style={{ background: "#fff" }}
-          breakpoint="lg"
-          className="transition-all hidden md:block duration-300"
-        >
-          <SidebarContent
-            openKeys={openKeys}
-            setOpenKeys={setOpenKeys}
-            selectedKeys={selectedKeys}
-            setSelectedKeys={setSelectedKeys}
-            handleProfile={handleProfile}
-            handleLogout={handleLogout}
+        <Sider width={200} style={{ background: colorBgContainer }}>
+          <Menu
+            mode="inline"
+            defaultSelectedKeys={['1']}
+            defaultOpenKeys={['sub1']}
+            style={{ height: '100%', borderRight: 0 }}
+            items={items2}
           />
         </Sider>
-
-        {/* منوی موبایل (Drawer) */}
-        <Drawer
-          title="منو"
-          placement="right"
-          onClose={onClose}
-          open={isDrawerOpen}
-          bodyStyle={{ padding: 0 }}
-        >
-          <SidebarContent
-            openKeys={openKeys}
-            setOpenKeys={setOpenKeys}
-            selectedKeys={selectedKeys}
-            setSelectedKeys={setSelectedKeys}
-            handleProfile={handleProfile}
-            handleLogout={handleLogout}
-            isMobile={true}
-            onClose={onClose}
+        <Layout style={{ padding: '0 24px 24px' }}>
+          <Breadcrumb
+            items={[{ title: 'Home' }, { title: 'List' }, { title: 'App' }]}
+            style={{ margin: '16px 0' }}
           />
-        </Drawer>
-
-        <Layout style={{ padding: "0 24px 24px" }}>
-          <div className="flex jc gap-4 items-center">
-            {/* دکمه باز کردن منوی موبایل */}
-            <button
-              onClick={onOpen}
-              className="!rounded-md hover:text-blue-00   duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
-            >
-              <MenuOutlined className="text-lg" />
-            </button>
-            
-            <div>
-              <Breadcrumb
-                items={[
-                  { title: "خانه" },
-                  { title: "لیست" },
-                  { title: "اپلیکیشن" },
-                ]}
-                style={{ margin: "16px 0" }}
-              />
-            </div>
-          </div>
-
-          {/* محتوای اصلی */}
           <Content
             style={{
               padding: 24,
               margin: 0,
               minHeight: 280,
-              background: "#fff",
-              borderRadius: "8px",
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
             }}
           >
-            <Outlet />
+            Content
           </Content>
         </Layout>
       </Layout>
@@ -132,4 +78,4 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
   );
 };
 
-export default PanelLayout;
+export default App;

@@ -1,12 +1,22 @@
-import {  RouterProvider } from 'react-router-dom'
-import './App.css'
-import routes from './Routes/routes'
+import { RouterProvider } from "react-router-dom";
+import routes from "./Routes/routes";
+import { Toaster } from "react-hot-toast";
+import getCurrentUser from "./service/users";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function App() {
+  getCurrentUser().then((response) => console.log(response.data)).catch();
 
   return (
-<RouterProvider   router={routes} />
-  )
+    <QueryClientProvider client={queryClient}>
+      <>
+        <Toaster />
+        <RouterProvider router={routes} />
+      </>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;

@@ -1,7 +1,6 @@
 import { Result, Button } from 'antd';
 
 interface ErrorLayoutProps {}
-
 const ErrorLayout: React.FC<ErrorLayoutProps> = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
