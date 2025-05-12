@@ -7,8 +7,8 @@ import {
 } from "@ant-design/icons";
 import { Menu, Button, Dropdown } from "antd";
 import type { MenuProps } from "antd";
-// حذف ایمپورت قبلی Link از antd
 import { Link } from "react-router-dom"; // اضافه شده
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 const items: MenuProps["items"] = [
   {
@@ -69,6 +69,7 @@ const SidebarContent = ({
 
   const AccountButtons = (
     <div className=" hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
+      test
       <Button
         type="text"
         icon={<UserOutlined />}
@@ -87,6 +88,10 @@ const SidebarContent = ({
       </Button>
     </div>
   );
+
+  const x = useCurrentUser();
+
+  console.log(x?.data , "test")
 
   return (
     <>
