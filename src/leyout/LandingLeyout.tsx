@@ -31,6 +31,8 @@ const LandingLayout: React.FC<LandingLayoutProps> = () => {
       {/* **  if contnet more => foter in layout */}
       <Footer className="!bg-slate-300 text-center text-base text-gray-800 font-medium tracking-wide">
         قسمت فوتر
+
+        <i className="fal b!g-amber-500 fa-dog-leashed">q</i>
       </Footer>
     </div>
   );
