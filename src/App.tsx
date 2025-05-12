@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient();
 
 function App() {
-  getCurrentUser().then((response) => console.log(response.data)).catch();
+  getCurrentUser().then((response) => console.log(response)).catch();
 
   return (
     <QueryClientProvider client={queryClient}>
