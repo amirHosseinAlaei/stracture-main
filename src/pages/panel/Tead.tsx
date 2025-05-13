@@ -1,4 +1,4 @@
-export function UserTableThead({ columns, setColumns }) {
+function UserTableThead({ columns, setColumns, onSort, sortKey, sortOrder }) {
   const handleDragStart = (e, index) => {
     e.dataTransfer.setData("colIndex", index);
   };
@@ -13,8 +13,11 @@ export function UserTableThead({ columns, setColumns }) {
     setColumns(updated);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
+  const handleDragOver = (e) => e.preventDefault();
+
+  const getSortSymbol = (key) => {
+    if (key !== sortKey) return "";
+    return sortOrder === "asc" ? "↑" : "↓";
   };
 
   return (
@@ -24,16 +27,19 @@ export function UserTableThead({ columns, setColumns }) {
         {columns.map((col, index) => (
           <th
             key={col.key}
-            className="border p-2 cursor-move"
+            className="border p-2 cursor-pointer select-none"
             draggable
             onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, index)}
+            onClick={() => onSort(col.key)}
           >
-            {col.label}
+            {col.label} {getSortSymbol(col.key)}
           </th>
         ))}
       </tr>
     </thead>
   );
 }
+
+export default UserTableThead;
