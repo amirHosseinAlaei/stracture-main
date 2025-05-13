@@ -6,3 +6,7 @@ const getCurrentUser = async () => {
 };
 
 export default getCurrentUser;
+
+
+
+

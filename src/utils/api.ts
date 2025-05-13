@@ -7,6 +7,7 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+
 // export const baseApi = {
 //   get: api.get,
 //   post: api.post,
@@ -37,6 +38,10 @@ api.interceptors.response.use(
 
     switch (status) {
       case 401:
+        window.location.href = DARGAH_URL;
+        break;
+
+    case 503:
         window.location.href = DARGAH_URL;
         break;
 

@@ -124,6 +124,8 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
               borderRadius: "8px",
             }}
           >
+
+            
             <Outlet />
           </Content>
         </Layout>

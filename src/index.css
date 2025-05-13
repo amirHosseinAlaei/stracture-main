@@ -1,5 +1,8 @@
 @import "tailwindcss";
+@import "../public/assets/fonts/fontFace.css";
 
 
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
 
+     fontFamily: {
+        'iranyekan': ['IRANYekanXFaNum', 'sans-serif'], // اضافه کردن فونت سفارشی
+      }

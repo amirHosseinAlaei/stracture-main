@@ -69,7 +69,6 @@ const SidebarContent = ({
 
   const AccountButtons = (
     <div className=" hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
-      test
       <Button
         type="text"
         icon={<UserOutlined />}
@@ -91,10 +90,22 @@ const SidebarContent = ({
 
   const x = useCurrentUser();
 
-  console.log(x?.data , "test")
+  console.log(x?.data?.data.userName , "test")
 
   return (
     <>
+
+<div className="  text-center p-4 space-y-3.5">
+
+<div>اواتار</div>
+<div>
+  {
+    x?.data?.data.firstName &&  x?.data?.data.lastName
+  }
+</div>
+
+
+  </div>    
       {AccountButtons}
 
       {/* فقط برای حالت غیر دسکتاپ */}
