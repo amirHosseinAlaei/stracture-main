@@ -1,9 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { UserTable } from "../../hooks/userTable";
-import UserTableThead from "./Tead";
 import UserTableTbody from "./Tbody";
+import { UserTableThead } from "./Tead";
 
-const columns = [
+const initialColumns = [
   { key: "userName", label: "نام کاربری" },
   { key: "firstName", label: "نام" },
   { key: "lastName", label: "نام خانوادگی" },
@@ -17,13 +17,15 @@ function PanelContent() {
   const items = data?.data?.items || [];
 
   const [page, setPage] = useState(1);
+  const [columns, setColumns] = useState(initialColumns);
+
   const totalPages = Math.ceil(items.length / PAGE_SIZE);
   const paginatedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="p-4 bg-violet-600 rolg">
-      <table className="  table-auto w-full  bg-amber-50    rounded-lg">
-        <UserTableThead columns={columns} />
+    <div className="p-4">
+      <table className="table-auto w-full border border-gray-300 rounded">
+        <UserTableThead columns={columns} setColumns={setColumns} />
         <UserTableTbody items={paginatedItems} columns={columns} />
       </table>
 
