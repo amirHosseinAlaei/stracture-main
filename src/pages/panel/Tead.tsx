@@ -2,7 +2,7 @@ import React from "react";
 
 function UserTableThead({ columns }) {
   return (
-    <thead>
+    <thead className="">
       <tr>
         <th>ردیف</th>
         {columns.map((col) => (

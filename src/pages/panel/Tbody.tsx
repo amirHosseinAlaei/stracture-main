@@ -1,10 +1,9 @@
-import React from "react";
 
 function UserTableTbody({ items, columns }) {
   if (!items || items.length === 0)
     return (
-      <tbody>
-        <tr>
+      <tbody  className="">
+        <tr className="bg-green-800 ">
           <td colSpan={columns.length + 1}>داده‌ای یافت نشد</td>
         </tr>
       </tbody>
