@@ -62,21 +62,36 @@ function TabelContainer({ initialColumns, data }) {
   };
 
   return (
-    <div className="">
+    <div className="px-5 py-4">
       {/* بخش جستجو */}
-      <div className="flex justify-between px-5 p-2 mb-6">
+      <div className="flex justify-between mb-6">
         <div className="flex gap-2 items-center">
-          <label htmlFor="search" className="font-medium">جستجو:</label>
-          <input
-            id="search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border px-2 py-1 rounded-md"
-            placeholder="جستجو در تمام فیلدها"
-          />
+          <label htmlFor="search" className="font-medium text-gray-700">جستجو:</label>
+          <div className="relative w-80">
+            <input
+              id="search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="جستجو در تمام فیلدها"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
         </div>
-        <div>تعداد کل : {filteredItems.length}</div>
+        <div className="text-gray-500">تعداد کل : {filteredItems.length}</div>
       </div>
 
       <div className="overflow-x-auto rounded-xl shadow-sm mb-4">
