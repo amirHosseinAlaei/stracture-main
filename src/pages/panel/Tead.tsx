@@ -21,13 +21,13 @@ function UserTableThead({ columns, setColumns, onSort, sortKey, sortOrder }) {
   };
 
   return (
-    <thead className="bg-gray-100">
+    <thead className="bg-[#e3e5e9]">
       <tr>
-        <th className="border p-2">ردیف</th>
+        <th className="p-4 text-left">ردیف</th>
         {columns.map((col, index) => (
           <th
             key={col.key}
-            className="border p-2 cursor-pointer select-none"
+            className="p-4 cursor-pointer select-none"
             draggable
             onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={handleDragOver}
