@@ -28,10 +28,6 @@ function App() {
         <>
           <Toaster />
           <RouterProvider router={routes} />
-          <Space>
-            <Button type="primary">Primary</Button>
-            <Button>Default</Button>
-          </Space>
         </>
       </QueryClientProvider>
     </ConfigProvider>

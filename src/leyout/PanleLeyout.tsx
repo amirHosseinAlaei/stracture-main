@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Layout, Breadcrumb, Drawer } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
-import SidebarContent from "../pages/panel/Sidebar";
+import SidebarContent from "../pages/panel/sidebar/Sidebar";
 import { Outlet } from "react-router-dom";
 
 const { Content, Sider } = Layout;
@@ -115,11 +115,9 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           </div>
 
           {/* محتوای اصلی */}
-          <Content
+          <Content className=""
             style={{
               padding: 24,
-              margin: 0,
-              minHeight: 280,
               background: "#fff",
               borderRadius: "8px",
             }}

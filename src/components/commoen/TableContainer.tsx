@@ -1,43 +1,42 @@
-
 import React, { useState, useMemo } from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
-import { UserTable } from "../../hooks/userTable";
-
-const initialColumns = [
-  { key: "userName", label: "نام کاربری" },
-  { key: "firstName", label: "نام" },
-  { key: "lastName", label: "نام خانوادگی" },
-  { key: "mobile", label: "موبایل" },
-  { key: "type", label: "سامانه" },
-  { key: "status", label: "وضعیت کاربران" },
-  { key: "twoFactorEnabled", label: "ورود دو مرحله ای" },
-];
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
-function PanelContent() {
-  const { data } = UserTable();
-  const items = data?.data?.items || [];
+function TabelContainer({ initialColumns, data }) {
+  const items = data || [];
 
+  const [searchQuery, setSearchQuery] = useState(""); // اضافه کردن state برای جستجو
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5); // به جای ثابت PAGE_SIZE
+  const [pageSize, setPageSize] = useState(5);
   const [columns, setColumns] = useState(initialColumns);
-
   const [sortKey, setSortKey] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
 
   const handleSort = (key) => {
-    if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortOrder("asc");
+    if (key === "firstName" || key === "lastName") {
+      if (sortKey === key) {
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        setSortKey(key);
+        setSortOrder("asc");
+      }
     }
   };
 
+  // فیلتر کردن داده‌ها بر اساس query جستجو
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return items; // اگر چیزی جستجو نشده، همه داده‌ها رو نمایش می‌دهیم
+    return items.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  }, [items, searchQuery]);
+
   const sortedItems = useMemo(() => {
-    const sorted = [...items];
+    const sorted = [...filteredItems];
     if (sortKey) {
       sorted.sort((a, b) => {
         const valA = a[sortKey] ?? "";
@@ -52,20 +51,36 @@ function PanelContent() {
       });
     }
     return sorted;
-  }, [items, sortKey, sortOrder]);
+  }, [filteredItems, sortKey, sortOrder]);
 
   const totalPages = Math.ceil(sortedItems.length / pageSize);
   const paginatedItems = sortedItems.slice((page - 1) * pageSize, page * pageSize);
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setPage(1); // وقتی سایز صفحه تغییر می‌کند، صفحه را به 1 برگردانیم
+    setPage(1);
   };
 
   return (
-    <div>
+    <div className="">
+      {/* بخش جستجو */}
+      <div className="flex justify-between px-5 p-2 mb-6">
+        <div className="flex gap-2 items-center">
+          <label htmlFor="search" className="font-medium">جستجو:</label>
+          <input
+            id="search"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border px-2 py-1 rounded-md"
+            placeholder="جستجو در تمام فیلدها"
+          />
+        </div>
+        <div>تعداد کل : {filteredItems.length}</div>
+      </div>
+
       <div className="overflow-x-auto rounded-xl shadow-sm mb-4">
-        <table className="table-auto w-full rounded bordrnone">
+        <table className="table-auto w-full rounded border-none">
           <UserTableThead
             columns={columns}
             setColumns={setColumns}
@@ -82,27 +97,20 @@ function PanelContent() {
         </table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <div className="mt-4 flex justify-center items-center gap-3">
-
-        {/* انتخاب تعداد سطرها */}
-        
-
-        {/* دکمه قبلی */}
         <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
           className={`px-4 py-2 border rounded-md font-medium transition-colors duration-200 ${
             page === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300"
           }`}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
-          aria-label="صفحه قبلی"
         >
           قبلی
         </button>
 
-        {/* دکمه‌های عددی صفحات */}
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
           <button
             key={pageNumber}
@@ -112,27 +120,24 @@ function PanelContent() {
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300"
             }`}
-            aria-current={pageNumber === page ? "page" : undefined}
           >
             {pageNumber}
           </button>
         ))}
 
-        {/* دکمه بعدی */}
         <button
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page === totalPages}
           className={`px-4 py-2 border rounded-md font-medium transition-colors duration-200 ${
             page === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300"
           }`}
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages}
-          aria-label="صفحه بعدی"
         >
           بعدی
         </button>
 
-        <div className="  p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center">
+        <div className="p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center">
           <label htmlFor="pageSizeSelect" className="font-medium">
             سطرها
           </label>
@@ -140,7 +145,7 @@ function PanelContent() {
             id="pageSizeSelect"
             value={pageSize}
             onChange={handlePageSizeChange}
-            className="rounded px-2 py-1"
+            className="rounded px-2 py-1 outline-none focus:outline-none"
           >
             {PAGE_SIZES.map((size) => (
               <option key={size} value={size}>
@@ -154,4 +159,4 @@ function PanelContent() {
   );
 }
 
-export default PanelContent;
+export default TabelContainer;

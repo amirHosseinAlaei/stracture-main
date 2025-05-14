@@ -5,10 +5,10 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Menu, Button, Dropdown } from "antd";
+import { Menu, Button, Dropdown, Avatar } from "antd"; // Avatar اضافه شده
 import type { MenuProps } from "antd";
 import { Link } from "react-router-dom"; // اضافه شده
-import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useCurrentUser } from "../../../hooks/useCurrentUser";
 
 const items: MenuProps["items"] = [
   {
@@ -68,7 +68,8 @@ const SidebarContent = ({
   );
 
   const AccountButtons = (
-    <div className=" hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
+    <div className="hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
+      
       <Button
         type="text"
         icon={<UserOutlined />}
@@ -84,31 +85,43 @@ const SidebarContent = ({
         onClick={handleLogout}
       >
         خروج
+        
       </Button>
     </div>
   );
 
   const x = useCurrentUser();
 
-  console.log(x?.data?.data.userName , "test")
+  console.log(x?.data?.data.userName, "test");
 
   return (
     <>
-
-<div className="  text-center p-4 space-y-3.5">
-
-<div>اواتار</div>
-<div>
-  {
-    x?.data?.data.firstName &&  x?.data?.data.lastName
-  }
-</div>
-
-
-  </div>    
+      <div className="text-center mt-7  space-y-3.5">
+        <div>
+          <Button
+            type="text"
+            style={{ fontSize: "20px" }}
+            className="!bg-gray-200 !rounded-[50%]"
+            icon={
+              x?.data?.data.avatarBase64 ? (
+                <Avatar
+                  src={`data:image/png;base64,${x.data.data.avatarBase64}`}
+                  size={40}
+                />
+              ) : (
+                <UserOutlined />
+              )
+            }
+          />
+        </div>
+        <div>
+          {x?.data?.data.firstName && x?.data?.data.lastName
+            ? `${x.data.data.firstName} ${x.data.data.lastName}`
+            : "نام کاربر"}
+        </div>
+      </div>
       {AccountButtons}
 
-      {/* فقط برای حالت غیر دسکتاپ */}
       {!isMobile && (
         <div className="hidden md:flex lg:hidden justify-center pt-6 pb-3 border-b border-b-[#eee] bg-white">
           <Dropdown overlay={profileMenu} trigger={["click"]}>

@@ -1,3 +1,4 @@
+
 function UserTableThead({ columns, setColumns, onSort, sortKey, sortOrder }) {
   const handleDragStart = (e, index) => {
     e.dataTransfer.setData("colIndex", index);
@@ -37,6 +38,8 @@ function UserTableThead({ columns, setColumns, onSort, sortKey, sortOrder }) {
             {col.label} {getSortSymbol(col.key)}
           </th>
         ))}
+        {/* اضافه کردن بخش اکشن */}
+        <th className="p-4">عملیات</th>
       </tr>
     </thead>
   );
