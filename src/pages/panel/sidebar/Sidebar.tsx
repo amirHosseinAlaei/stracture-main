@@ -46,24 +46,10 @@ const panelItems = [
 
 // آیتم‌های اصلی سایدبار
 const items: MenuProps["items"] = [
-  {
-    key: "sub1",
-    icon: <UserOutlined />,
-    label: <Link to="/auth">sad</Link>,
-  },
-  // آیتم‌های پنل را اضافه می‌کنیم
+
   ...panelItems,
-  {
-    key: "sub2",
-    icon: <LaptopOutlined />,
-    label: "زیرمنو ۲",
-  },
-  {
-    key: "sub3",
-    icon: <NotificationOutlined />,
-    label: "زیرمنو ۳",
-    children: [{ key: "12", label: "گزینه ۱۲" }],
-  },
+ 
+
 ];
 
 const SidebarContent = ({

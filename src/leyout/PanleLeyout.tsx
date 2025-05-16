@@ -6,34 +6,60 @@ import { Outlet } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 
-const PanelLayout: React.FC = () => {
+interface PanelLayoutProps {}
+
+interface SidebarContentProps {
+  openKeys: string[];
+  setOpenKeys: (keys: string[]) => void;
+  selectedKeys: string[];
+  setSelectedKeys: (keys: string[]) => void;
+  handleProfile: () => void;
+  handleLogout: () => void;
+  isMobile?: boolean;
+  onClose?: () => void;
+}
+
+const PanelLayout: React.FC<PanelLayoutProps> = () => {
+  // تعریف state ها با تایپ‌های مشخص
   const [openKeys, setOpenKeys] = useState<string[]>(
     window.innerWidth >= 992 ? ["sub1"] : []
   );
+
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
+
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  const onOpen = () => setIsDrawerOpen(true);
-  const onClose = () => setIsDrawerOpen(false);
+  // تعریف توابع با تایپ‌های مشخص
+  const onOpen = (): void => {
+    setIsDrawerOpen(true);
+  };
 
-  const handleProfile = () => alert("صفحه حساب کاربری");
-  const handleLogout = () => alert("خروج از حساب");
+  const onClose = (): void => {
+    setIsDrawerOpen(false);
+  };
+
+  const handleProfile = (): void => {
+    alert("صفحه حساب کاربری");
+  };
+
+  const handleLogout = (): void => {
+    alert("خروج از حساب");
+  };
 
   return (
     <Layout
+      className=" "
       style={{
         direction: "rtl",
-        fontFamily: "Vazirmatn, Tahoma, Arial, sans-serif",
-        height: "100vh", // تمام ارتفاع صفحه
       }}
     >
       <Layout>
-        {/* سایدبار دسکتاپ */}
         <Sider
           width={200}
           style={{ background: "#fff" }}
           breakpoint="lg"
           className="transition-all hidden md:block duration-300"
+          
         >
           <SidebarContent
             openKeys={openKeys}
@@ -45,7 +71,7 @@ const PanelLayout: React.FC = () => {
           />
         </Sider>
 
-        {/* سایدبار موبایل */}
+        {/* منوی موبایل (Drawer) */}
         <Drawer
           title="منو"
           placement="right"
@@ -65,35 +91,35 @@ const PanelLayout: React.FC = () => {
           />
         </Drawer>
 
-        {/* محتوای صفحه */}
         <Layout style={{ padding: "0 24px 24px" }}>
-          {/* منو و نوار بالا */}
-          <div className="flex jc gap-4 items-center" style={{ paddingTop: 16 }}>
+          <div className="flex jc gap-4 items-center">
+            {/* دکمه باز کردن منوی موبایل */}
             <button
               onClick={onOpen}
-              className="!rounded-md hover:text-blue-600 duration-300 cursor-pointer bg-white !p-2.5 md:!hidden"
+              className="!rounded-md hover:text-blue-00   duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
             >
               <MenuOutlined className="text-lg" />
             </button>
 
-            <Breadcrumb
-              items={[
-                { title: "خانه" },
-                { title: "لیست" },
-                { title: "اپلیکیشن" },
-              ]}
-              style={{ margin: "16px 0" }}
-            />
+            <div>
+              <Breadcrumb
+                items={[
+                  { title: "خانه" },
+                  { title: "لیست" },
+                  { title: "اپلیکیشن" },
+                ]}
+                style={{ margin: "16px 0" }}
+              />
+            </div>
           </div>
 
           {/* محتوای اصلی */}
           <Content
+            className=""
             style={{
               padding: 24,
               background: "#fff",
               borderRadius: "8px",
-              minHeight: 'calc(100vh - 100px)', // فضای کافی
-              overflow: "hidden", // جلوگیری از بیرون‌زدگی
             }}
           >
             <Outlet />
