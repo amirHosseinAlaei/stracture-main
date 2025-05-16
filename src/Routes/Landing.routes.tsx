@@ -15,7 +15,7 @@ const landingRoutes = {
 
   children: [
     {
-      path: "/a",
+      path: "/",
       element: (
         <Suspenswrapper>
           <LandingContent />

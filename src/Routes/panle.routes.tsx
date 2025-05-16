@@ -2,25 +2,74 @@ import { lazy, Suspense } from "react";
 import PanelLayout from "../leyout/PanleLeyout"; // اصلاح نام
 import Loading from "../components/commoen/Loading"; // اصلاح نام
 
-const ShowUserTabel = lazy(() => import("../pages/panel/user/ShowUserTabel")); // اصلاح نام
+const PanelEmpty = lazy(() =>
+  import("../pages/panel/cleanroom/PanelEmpty")
+); // اصلاح نام
+const ShowUserTabel = lazy(() =>
+  import("../pages/panel/user/ShowUserTabel")
+); // اصلاح نام
 
-const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <Suspense fallback={<Loading />}>{children}</Suspense>;
+const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  return <Suspense fallback={<Loading />}>{children}</Suspense>;
 };
 
 const PanelRoutes = {
-    path: "/panel", // اصلاح نام
-    element: <PanelLayout />,
-    children: [
-        {
-            path: "",
-            element: (
-                <SuspenseWrapper>
-                    <ShowUserTabel />
-                </SuspenseWrapper>
-            ),
-        },
-    ],
+  path: "/panel", // اصلاح نام
+  element: <PanelLayout />,
+  children: [
+    // مسیر پیش‌فرض برای نمایش PanelEmpty
+    {
+      path: "",
+      element: (
+        <SuspenseWrapper>
+          <PanelEmpty />
+        </SuspenseWrapper>
+      ),
+    },
+    // سایر مسیرها برای نمایش ShowUserTabel
+    {
+      path: "users",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+    },
+    {
+      path: "sessions",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+    },
+    {
+      path: "active",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+    },
+    {
+      path: "members",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+    },
+    {
+      path: "settings",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+    },
+  ],
 };
 
 export default PanelRoutes;

@@ -1,38 +1,44 @@
-import { Layout, Button, Space } from "antd";
-import { Outlet } from "react-router-dom";
+import { Layout, Button } from "antd";
+import { data, Outlet } from "react-router-dom";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+
+// وارد کردن توابع از فایل dateUtils
+import { formatPersianDate } from "../utils/toPersia"; // مسیر فایل را درست وارد کنید
+
 const { Header, Content, Footer } = Layout;
-// header and footer is fixe and content => outlet
 
 interface LandingLayoutProps {}
+
 const LandingLayout: React.FC<LandingLayoutProps> = () => {
+  const x = useCurrentUser();
+
+  // گرفتن تاریخ امروز
+  const today = new Date();
+
+  // فرمت کردن تاریخ به شکل "شنبه ۲۷ اردیبهشت ۱۴۰۴"
+  const persianFormattedDate = formatPersianDate(today);
+
   return (
     <div className="flex flex-col min-h-screen" style={{ direction: "rtl" }}>
       <Layout className="flex-1 flex flex-col">
         {/* landing-header */}
-        <Header className="!bg-slate-800 flex items-center justify-between px-8">
-          <div className="text-white font-bold text-[22px]">لوگوی سایت</div>
-          <Space>
-            <Button type="default" size="large">
-              ورود
-            </Button>
-            <Button type="primary" size="large">
-              ثبت نام
-            </Button>
-          </Space>
+        <Header className="!bg-white shadow-lg flex items-center justify-between px-8">
+          <div className="text-black font-bold text-[22px]">لوگوی سایت</div>
+          <Button className="items-center to-current">
+            {x?.data?.data?.firstName + " " + x?.data?.data?.lastName}
+          </Button>
         </Header>
 
         {/* content => outlet */}
-        <Content className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center">
+        <Content className="flex-1 flex flex-col px-4 p-4">
           <Outlet />
         </Content>
       </Layout>
 
-      {/* foter */}
-      {/* **  if contnet more => foter in layout */}
-      <Footer className="!bg-slate-300 text-center text-base text-gray-800 font-medium tracking-wide">
-        قسمت فوتر
-
-        <i className="fal b!g-amber-500 fa-dog-leashed">q</i>
+      {/* footer */}
+      <Footer className="!shadow-lg !bg-[#0101011a] text-center text-base text-gray-800 font-medium tracking-wide">
+        {/* اضافه کردن تاریخ و روز فارسی */}
+        <div>{`تاریخ امروز: ${persianFormattedDate}`}</div>
       </Footer>
     </div>
   );

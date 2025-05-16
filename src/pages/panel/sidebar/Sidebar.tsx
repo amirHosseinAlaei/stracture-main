@@ -3,27 +3,64 @@ import {
   LaptopOutlined,
   NotificationOutlined,
   UserOutlined,
+  TeamOutlined,
+  MessageOutlined,
+  CheckCircleOutlined,
+  SettingOutlined,
+  UsergroupAddOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Menu, Button, Dropdown, Avatar } from "antd"; // Avatar اضافه شده
+import { Menu, Button, Dropdown, Avatar } from "antd";
 import type { MenuProps } from "antd";
-import { Link } from "react-router-dom"; // اضافه شده
+import { Link } from "react-router-dom";
 import { useCurrentUser } from "../../../hooks/useCurrentUser";
 
+// آیتم‌های پنل از روی کد قبلی
+const panelItems = [
+  {
+    key: "panel-users",
+    icon: <TeamOutlined />,
+    label: <Link to="/panel/users">کاربران و گروه‌ها</Link>,
+  },
+  {
+    key: "panel-sessions",
+    icon: <MessageOutlined />,
+    label: <Link to="/panel/sessions">پیام‌ها و گفتگوها</Link>,
+  },
+  {
+    key: "panel-active",
+    icon: <CheckCircleOutlined />,
+    label: <Link to="/panel/active">وضعیت تایید</Link>,
+  },
+  {
+    key: "panel-members",
+    icon: <UsergroupAddOutlined />,
+    label: <Link to="/panel/members">اعضا و کاربران</Link>,
+  },
+  {
+    key: "panel-settings",
+    icon: <SettingOutlined />,
+    label: <Link to="/panel/settings">تنظیمات سیستم</Link>,
+  },
+];
+
+// آیتم‌های اصلی سایدبار
 const items: MenuProps["items"] = [
   {
     key: "sub1",
-    icon: React.createElement(UserOutlined),
-    label: <Link to="/auth">sad</Link>, // اصلاح شده
+    icon: <UserOutlined />,
+    label: <Link to="/auth">sad</Link>,
   },
+  // آیتم‌های پنل را اضافه می‌کنیم
+  ...panelItems,
   {
     key: "sub2",
-    icon: React.createElement(LaptopOutlined),
+    icon: <LaptopOutlined />,
     label: "زیرمنو ۲",
   },
   {
     key: "sub3",
-    icon: React.createElement(NotificationOutlined),
+    icon: <NotificationOutlined />,
     label: "زیرمنو ۳",
     children: [{ key: "12", label: "گزینه ۱۲" }],
   },
@@ -38,15 +75,6 @@ const SidebarContent = ({
   handleLogout,
   isMobile = false,
   onClose = () => {},
-}: {
-  openKeys: string[];
-  setOpenKeys: (keys: string[]) => void;
-  selectedKeys: string[];
-  setSelectedKeys: (keys: string[]) => void;
-  handleProfile: () => void;
-  handleLogout: () => void;
-  isMobile?: boolean;
-  onClose?: () => void;
 }) => {
   const profileMenu = (
     <Menu
@@ -69,7 +97,6 @@ const SidebarContent = ({
 
   const AccountButtons = (
     <div className="hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
-      
       <Button
         type="text"
         icon={<UserOutlined />}
@@ -85,14 +112,11 @@ const SidebarContent = ({
         onClick={handleLogout}
       >
         خروج
-        
       </Button>
     </div>
   );
 
   const x = useCurrentUser();
-
-  console.log(x?.data?.data.userName, "test");
 
   return (
     <>

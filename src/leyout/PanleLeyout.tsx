@@ -6,56 +6,29 @@ import { Outlet } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 
-interface PanelLayoutProps {}
-
-interface SidebarContentProps {
-  openKeys: string[];
-  setOpenKeys: (keys: string[]) => void;
-  selectedKeys: string[];
-  setSelectedKeys: (keys: string[]) => void;
-  handleProfile: () => void;
-  handleLogout: () => void;
-  isMobile?: boolean;
-  onClose?: () => void;
-}
-
-const PanelLayout: React.FC<PanelLayoutProps> = () => {
-  // تعریف state ها با تایپ‌های مشخص
+const PanelLayout: React.FC = () => {
   const [openKeys, setOpenKeys] = useState<string[]>(
     window.innerWidth >= 992 ? ["sub1"] : []
   );
-
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
-
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  // تعریف توابع با تایپ‌های مشخص
-  const onOpen = (): void => {
-    setIsDrawerOpen(true);
-  };
+  const onOpen = () => setIsDrawerOpen(true);
+  const onClose = () => setIsDrawerOpen(false);
 
-  const onClose = (): void => {
-    setIsDrawerOpen(false);
-  };
-
-  const handleProfile = (): void => {
-    alert("صفحه حساب کاربری");
-  };
-
-  const handleLogout = (): void => {
-    alert("خروج از حساب");
-  };
+  const handleProfile = () => alert("صفحه حساب کاربری");
+  const handleLogout = () => alert("خروج از حساب");
 
   return (
     <Layout
-      className="h-screen"
       style={{
         direction: "rtl",
         fontFamily: "Vazirmatn, Tahoma, Arial, sans-serif",
+        height: "100vh", // تمام ارتفاع صفحه
       }}
     >
       <Layout>
-        {/* سایدبار */}
+        {/* سایدبار دسکتاپ */}
         <Sider
           width={200}
           style={{ background: "#fff" }}
@@ -72,7 +45,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Sider>
 
-        {/* منوی موبایل (Drawer) */}
+        {/* سایدبار موبایل */}
         <Drawer
           title="منو"
           placement="right"
@@ -92,38 +65,37 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Drawer>
 
+        {/* محتوای صفحه */}
         <Layout style={{ padding: "0 24px 24px" }}>
-          <div className="flex jc gap-4 items-center">
-            {/* دکمه باز کردن منوی موبایل */}
+          {/* منو و نوار بالا */}
+          <div className="flex jc gap-4 items-center" style={{ paddingTop: 16 }}>
             <button
               onClick={onOpen}
-              className="!rounded-md hover:text-blue-00   duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
+              className="!rounded-md hover:text-blue-600 duration-300 cursor-pointer bg-white !p-2.5 md:!hidden"
             >
               <MenuOutlined className="text-lg" />
             </button>
 
-            <div>
-              <Breadcrumb
-                items={[
-                  { title: "خانه" },
-                  { title: "لیست" },
-                  { title: "اپلیکیشن" },
-                ]}
-                style={{ margin: "16px 0" }}
-              />
-            </div>
+            <Breadcrumb
+              items={[
+                { title: "خانه" },
+                { title: "لیست" },
+                { title: "اپلیکیشن" },
+              ]}
+              style={{ margin: "16px 0" }}
+            />
           </div>
 
           {/* محتوای اصلی */}
-          <Content className=""
+          <Content
             style={{
               padding: 24,
               background: "#fff",
               borderRadius: "8px",
+              minHeight: 'calc(100vh - 100px)', // فضای کافی
+              overflow: "hidden", // جلوگیری از بیرون‌زدگی
             }}
           >
-
-            
             <Outlet />
           </Content>
         </Layout>
