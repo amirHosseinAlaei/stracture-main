@@ -1,44 +1,56 @@
 import { Layout, Button } from "antd";
-import { data, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-
-// وارد کردن توابع از فایل dateUtils
-import { formatPersianDate } from "../utils/toPersia"; // مسیر فایل را درست وارد کنید
+import { formatPersianDate } from "../utils/toPersia";
+import { useEffect } from "react";
+import { toast } from "react-hot-toast"; // اضافه کردن ایمپورت
 
 const { Header, Content, Footer } = Layout;
 
-interface LandingLayoutProps {}
-
-const LandingLayout: React.FC<LandingLayoutProps> = () => {
-  const x = useCurrentUser();
-
-  // گرفتن تاریخ امروز
+const LandingLayout: React.FC = () => {
+  const currentUserQuery = useCurrentUser();
+// Date today  
   const today = new Date();
-
-  // فرمت کردن تاریخ به شکل "شنبه ۲۷ اردیبهشت ۱۴۰۴"
   const persianFormattedDate = formatPersianDate(today);
+
+// Show user
+  const fullName = currentUserQuery.isLoading
+    ? "در حال بارگذاری..."
+    : currentUserQuery.isError
+    ? "خطا در دریافت"
+    : currentUserQuery.data?.data
+    ? `${currentUserQuery.data.data.firstName} ${currentUserQuery.data.data.lastName}`
+    : "کاربر ناشناس";
+
+  useEffect(() => {
+    const hasWelcomed = sessionStorage.getItem("hasWelcomed");
+    if (currentUserQuery.data?.data && !hasWelcomed) {
+      toast.success(`خوش آمدید، ${fullName}`);
+      sessionStorage.setItem("hasWelcomed", "true"); 
+    }
+  }, [fullName, currentUserQuery.data?.data]); 
 
   return (
     <div className="flex flex-col min-h-screen" style={{ direction: "rtl" }}>
       <Layout className="flex-1 flex flex-col">
-        {/* landing-header */}
+        {/* Header */}
         <Header className="!bg-white shadow-lg flex items-center justify-between px-8">
           <div className="text-black font-bold text-[22px]">لوگوی سایت</div>
-          <Button className="items-center to-current">
-            {x?.data?.data?.firstName + " " + x?.data?.data?.lastName}
-          </Button>
+          <Button className="items-center to-current">{fullName}</Button>
         </Header>
 
-        {/* content => outlet */}
+        {/* Content */}
         <Content className="flex-1 flex flex-col px-4 p-4">
           <Outlet />
         </Content>
       </Layout>
 
-      {/* footer */}
-      <Footer className="!shadow-lg !bg-[#0101011a] text-center text-base text-gray-800 font-medium tracking-wide">
-        {/* اضافه کردن تاریخ و روز فارسی */}
-        <div>{`تاریخ امروز: ${persianFormattedDate}`}</div>
+      {/* Footer */}
+      <Footer className="!shadow-lg !bg-[#0101011a] text-center text-base !text-blue-600 font-bold tracking-wide">
+        <div className="flex items-center justify-center space-x-2">
+          <i className="fas fa-calendar-day text-xl"></i> {/* آیکون تقویم */}
+          <span>{`تاریخ امروز: ${persianFormattedDate}`}</span>
+        </div>
       </Footer>
     </div>
   );

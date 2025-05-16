@@ -1,17 +1,20 @@
+// show a center  round and chields eveyo one of them have text and rout 
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
-// center
+// Center Round
 const center = 275;
 const centerCircleSize = 80;
-// line
+// line start
 const angles = [0, 72, 144, 216, 288];
 
-// child size
+//  size round chield
 const childCircleSizes = [45, 55, 40, 60, 50];
-// child line-long
-const childRadii = [155, 155, 190, 190, 170];
-// icons
+
+//  gap round => to center round
+const childRadii = [135, 145, 160, 170, 165];
+
+//  icons
 const iconClasses = [
   "far fa-users",
   "far fa-comments",
@@ -19,9 +22,14 @@ const iconClasses = [
   "far fa-user",
   "far fa-cogs",
 ];
-
-// مسیرها
-const routes = ["/panel/users", "/panel/sessions", "/panel/active", "/panel/members", "/panel/settings"];
+// rout addres
+const routes = [
+  "/panel/users",
+  "/panel/sessions",
+  "/panel/active",
+  "/panel/members",
+  "/panel/settings",
+];
 const hoverTexts = [
   "کاربران و گروه‌ها",
   "پیام‌ها و گفتگوها",
@@ -38,8 +46,8 @@ function PanelEmpty() {
   const requestRef = useRef();
   const [rotation, setRotation] = useState(0);
   const [hoverIndex, setHoverIndex] = useState(null);
-  // speed
-  const rotationSpeed = 0.02;
+
+  const rotationSpeed = 0.01; // ! speed round
   const hoverText = hoverIndex !== null ? hoverTexts[hoverIndex] : "";
 
   const animate = () => {
@@ -59,6 +67,7 @@ function PanelEmpty() {
   return (
     <div className="flex items-center justify-center min-h-[500px] h-full">
       <svg width="550" height="550" viewBox="0 0 550 550">
+        {/* center dound */}
         <circle
           cx={center}
           cy={center}
@@ -86,7 +95,12 @@ function PanelEmpty() {
         >
           {hoverText}
         </text>
-        <g transform={`rotate(${rotation}, ${center}, ${center})`} style={{ cursor: "pointer" }}>
+
+        {/* round => all  */}
+        <g
+          transform={`rotate(${rotation}, ${center}, ${center})`}
+          style={{ cursor: "pointer" }}
+        >
           {angles.map((angle, i) => {
             const rad = toRadians(angle);
             const size = childCircleSizes[i];
@@ -104,7 +118,6 @@ function PanelEmpty() {
             const iconSize = size * 0.6;
             const foX = endX - iconSize / 2;
             const foY = endY - iconSize / 2;
-            const iconRotation = -rotation;
 
             return (
               <g
@@ -134,18 +147,25 @@ function PanelEmpty() {
                   y={foY}
                   width={iconSize}
                   height={iconSize}
-                  style={{ pointerEvents: "none", overflow: "visible" }}
+                  style={{
+                    pointerEvents: "none",
+                    overflow: "visible",
+                    willChange: "transform",
+                  }}
                 >
                   <div
                     className="w-full h-full flex items-center justify-center"
                     style={{
-                      transform: `rotate(${iconRotation}deg)`,
-                      transformOrigin: "50% 50%",
+                      transform: `rotate(${-rotation}deg)`,
+                      transformOrigin: "center center",
                       fontSize: `${iconSize}px`,
+                      willChange: "transform",
                     }}
                   >
                     <i
-                      className={`${iconClasses[i]} ${isHovered ? "text-white" : "text-black"}`}
+                      className={`${iconClasses[i]} ${
+                        isHovered ? "text-white" : "text-black"
+                      }`}
                       style={{ fontSize: `${iconSize}px` }}
                     />
                   </div>
