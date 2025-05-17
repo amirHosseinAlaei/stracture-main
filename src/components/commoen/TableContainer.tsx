@@ -107,8 +107,11 @@ function TabelContainer({
               جستجو
             </button>
 
-            <Button onClick={() => setIsFilterModalVisible(true)}>فیلتر</Button>
           </div>
+            <Button className="!h-12" onClick={() => setIsFilterModalVisible(true)}>
+
+               <i className="fa fa-filter"></i> 
+            </Button>
         </div>
         <div className="text-gray-500">تعداد کل : {totalCount}</div>
       </div>
