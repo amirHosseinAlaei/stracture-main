@@ -1,44 +1,22 @@
-
-function UserTableThead({ columns, setColumns, onSort, sortKey, sortOrder }) {
-  const handleDragStart = (e, index) => {
-    e.dataTransfer.setData("colIndex", index);
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    const dragIndex = parseInt(e.dataTransfer.getData("colIndex"));
-    if (dragIndex === dropIndex) return;
-
-    const updated = [...columns];
-    const [moved] = updated.splice(dragIndex, 1);
-    updated.splice(dropIndex, 0, moved);
-    setColumns(updated);
-  };
-
-  const handleDragOver = (e) => e.preventDefault();
-
+function UserTableThead({ columns, onSort }) {
   const getSortSymbol = (key) => {
-    if (key !== sortKey) return "";
-    return sortOrder === "asc" ? "↑" : "↓";
+    // اگر بخواهید مرتب‌سازی سرور ساید اضافه کنید، این تابع را اصلاح کنید.
+    return "";
   };
 
   return (
     <thead className="bg-[#e3e5e9]">
       <tr>
         <th className="p-4 text-left">ردیف</th>
-        {columns.map((col, index) => (
+        {columns.map((col) => (
           <th
             key={col.key}
             className="p-4 cursor-pointer select-none"
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
-            onClick={() => onSort(col.key)}
-          >
+            onClick={() => onSort && onSort(col.key)}
+          > 
             {col.label} {getSortSymbol(col.key)}
           </th>
         ))}
-        {/* اضافه کردن بخش اکشن */}
         <th className="p-4">عملیات</th>
       </tr>
     </thead>

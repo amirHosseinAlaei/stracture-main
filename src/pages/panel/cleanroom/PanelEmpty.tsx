@@ -9,10 +9,10 @@ const centerCircleSize = 80;
 const angles = [0, 72, 144, 216, 288];
 
 //  size round chield
-const childCircleSizes = [45, 55, 40, 60, 50];
+const childCircleSizes = [55, 55, 40, 60, 50];
 
 //  gap round => to center round
-const childRadii = [135, 145, 160, 170, 165];
+const childRadii = [145, 145, 160, 170, 165];
 
 //  icons
 const iconClasses = [

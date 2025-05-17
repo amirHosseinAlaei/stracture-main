@@ -1,64 +1,34 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
-function TabelContainer({ initialColumns, data }) {
-  const items = data || [];
+function TabelContainer({
+  initialColumns,
+  data,
+  totalCount,
+  searchInput,
+  setSearchInput,
+  setSearch,
+  page,
+  setPage,
+  pageSize,
+  setPageSize,
+}) {
+  const columns = initialColumns;
 
-  const [searchQuery, setSearchQuery] = useState(""); // اضافه کردن state برای جستجو
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [columns, setColumns] = useState(initialColumns);
-  const [sortKey, setSortKey] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc");
-
-  const handleSort = (key) => {
-    if (key === "firstName" || key === "lastName") {
-      if (sortKey === key) {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-      } else {
-        setSortKey(key);
-        setSortOrder("asc");
-      }
-    }
-  };
-
-  // فیلتر کردن داده‌ها بر اساس query جستجو
-  const filteredItems = useMemo(() => {
-    if (!searchQuery) return items; // اگر چیزی جستجو نشده، همه داده‌ها رو نمایش می‌دهیم
-    return items.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [items, searchQuery]);
-
-  const sortedItems = useMemo(() => {
-    const sorted = [...filteredItems];
-    if (sortKey) {
-      sorted.sort((a, b) => {
-        const valA = a[sortKey] ?? "";
-        const valB = b[sortKey] ?? "";
-        if (typeof valA === "string") {
-          return sortOrder === "asc"
-            ? valA.localeCompare(valB)
-            : valB.localeCompare(valA);
-        } else {
-          return sortOrder === "asc" ? valA - valB : valB - valA;
-        }
-      });
-    }
-    return sorted;
-  }, [filteredItems, sortKey, sortOrder]);
-
-  const totalPages = Math.ceil(sortedItems.length / pageSize);
-  const paginatedItems = sortedItems.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setPage(1);
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setPage(1); // وقتی سایز صفحه تغییر می‌کند، صفحه را به 1 برگردان
+  };
+
+  const handleSearchClick = () => {
+    setPage(1); // وقتی جستجو انجام می‌شود، صفحه را به 1 برگردان
+    setSearch(searchInput);
   };
 
   return (
@@ -67,52 +37,48 @@ function TabelContainer({ initialColumns, data }) {
       <div className="flex justify-between mb-6">
         <div className="flex gap-2 items-center">
           <label htmlFor="search" className="font-medium text-gray-700">جستجو:</label>
-          <div className="relative w-80">
+          <div className="relative border rounded-md shadow border-slate-200 p-2 w-80 flex items-center gap-2">
             <input
               id="search"
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInput(val);
+                if (val === "") {
+                  setPage(1);
+                  setSearch("");
+                }
+              }}
+              className="w-full py-2 pl-10 pr-4    bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="جستجو در تمام فیلدها"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearchClick();
+                }
+              }}
             />
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        
+            <button
+              onClick={handleSearchClick}
+              className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+              جستجو
+            </button>
           </div>
         </div>
-        <div className="text-gray-500">تعداد کل : {filteredItems.length}</div>
+        <div className="text-gray-500">تعداد کل : {totalCount}</div>
       </div>
 
+      {/* جدول */}
       <div className="overflow-x-auto rounded-xl shadow-sm mb-4">
         <table className="table-auto w-full rounded border-none">
-          <UserTableThead
-            columns={columns}
-            setColumns={setColumns}
-            onSort={handleSort}
-            sortKey={sortKey}
-            sortOrder={sortOrder}
-          />
-          <UserTableTbody
-            items={paginatedItems}
-            columns={columns}
-            page={page}
-            pageSize={pageSize}
-          />
+          <UserTableThead columns={columns} />
+          <UserTableTbody items={data} columns={columns} page={page} pageSize={pageSize} />
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* صفحه بندی */}
       <div className="mt-4 flex justify-center items-center gap-3">
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
