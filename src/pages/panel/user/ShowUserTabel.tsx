@@ -92,16 +92,16 @@ const ShowUserTabel = () => {
 
   return (
     <TabelContainer
-      initialColumns={columns}
-      data={data?.data?.items || []}
-      totalCount={data?.data?.totalCount || 0}
-      searchInput={searchInput}
-      setSearchInput={setSearchInput}
-      setSearch={setSearch}
-      page={pageIndex}
-      setPage={setPageIndex}
-      pageSize={pageSize}
-      setPageSize={setPageSize}
+    initialColumns={columns}
+    data={data?.data?.items || []}
+    totalCount={data?.data?.totalCount || 0}
+    searchInput={searchInput}
+    setSearchInput={setSearchInput}
+    setSearch={setSearch}
+    page={pageIndex}
+    setPage={setPageIndex}
+    pageSize={pageSize}
+    setPageSize={setPageSize}
       actionButtons={actionButtons} // ارسال دکمه‌ها
     />
   );

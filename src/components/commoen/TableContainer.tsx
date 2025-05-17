@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
+import { Button, Modal } from "antd";
+import FilterModal from "./filter";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
@@ -36,10 +38,12 @@ function TabelContainer({
   setPageSize,
   actionButtons,
 }: TabelContainerProps) {
-  // استیت محلی برای نگهداری ترتیب ستون‌ها
   const [columns, setColumns] = useState(initialColumns);
 
   const totalPages = Math.ceil(totalCount / pageSize);
+
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [filterValues, setFilterValues] = useState({});
 
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = Number(e.target.value);
@@ -56,12 +60,25 @@ function TabelContainer({
     setColumns(newColumns);
   };
 
+  const handleFilterApply = (values: any) => {
+    setFilterValues(values);
+    setIsFilterModalVisible(false);
+    // اینجا می‌توانی فیلترها را اعمال کنی، مثلاً داده‌ها را فیلتر کنی یا درخواست جدید بزنی
+    // مثلا: setSearchWithFilters(values)
+  };
+
+  const handleFilterCancel = () => {
+    setIsFilterModalVisible(false);
+  };
+
   return (
     <div className="px-5 py-4">
       {/* بخش جستجو */}
       <div className="flex justify-between mb-6">
         <div className="flex gap-2 items-center">
-          <label htmlFor="search" className="font-medium text-gray-700">جستجو:</label>
+          <label htmlFor="search" className="font-medium text-gray-700">
+            جستجو:
+          </label>
           <div className="relative border rounded-md shadow border-slate-200 p-2 w-80 flex items-center gap-2">
             <input
               id="search"
@@ -78,7 +95,7 @@ function TabelContainer({
               className="w-full py-2 pl-10 pr-4 bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="جستجو در تمام فیلدها"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   handleSearchClick();
                 }
               }}
@@ -89,6 +106,8 @@ function TabelContainer({
             >
               جستجو
             </button>
+
+            <Button onClick={() => setIsFilterModalVisible(true)}>فیلتر</Button>
           </div>
         </div>
         <div className="text-gray-500">تعداد کل : {totalCount}</div>
@@ -166,6 +185,21 @@ function TabelContainer({
           </select>
         </div>
       </div>
+
+      {/* مدال فیلتر */}
+      <Modal
+        title="فیلترها"
+        visible={isFilterModalVisible}
+        footer={null}
+        onCancel={handleFilterCancel}
+        destroyOnClose={true}
+      >
+        <FilterModal
+          initialValues={filterValues}
+          handleFilterApply={handleFilterApply}
+          handleFilterCancel={handleFilterCancel}
+        />
+      </Modal>
     </div>
   );
 }
