@@ -1,6 +1,5 @@
 function UserTableThead({ columns, onSort }) {
   const getSortSymbol = (key) => {
-    // اگر بخواهید مرتب‌سازی سرور ساید اضافه کنید، این تابع را اصلاح کنید.
     return "";
   };
 

@@ -3,11 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
 import getUsers from "../../../service/userFilter";
+import {
+  SafetyCertificateOutlined,
+  LockOutlined,
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 
 const ShowUserTabel = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // خواندن مقادیر اولیه از URL و تنظیم مقدار پیش‌فرض
   const initialSearch = searchParams.get("search") || "";
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
   const initialPageSize = parseInt(searchParams.get("pageSize") || "5", 10);
@@ -17,7 +23,6 @@ const ShowUserTabel = () => {
   const [pageIndex, setPageIndex] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  // هر بار که search, pageIndex یا pageSize تغییر کند، URL را به‌روزرسانی کن
   useEffect(() => {
     const params = {};
     if (search) params.search = search;
@@ -27,7 +32,6 @@ const ShowUserTabel = () => {
     setSearchParams(params);
   }, [search, pageIndex, pageSize, setSearchParams]);
 
-  // وقتی جستجو یا صفحه یا سایز صفحه تغییر کرد، کوئری اجرا می‌شود
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users", pageIndex, pageSize, search],
     queryFn: () =>
@@ -47,6 +51,41 @@ const ShowUserTabel = () => {
     { key: "twoFactorEnabled", label: "ورود دو مرحله ای" },
   ];
 
+  // تعریف دکمه‌های داینامیک با عملکرد نمونه
+  const actionButtons = [
+    {
+      icon: <SafetyCertificateOutlined />,
+      title: "امنیت",
+      description: "تنظیمات امنیتی",
+      onClick: (item) => alert(`Security clicked for ${item.userName}`),
+    },
+    {
+      icon: <LockOutlined />,
+      title: "تغییر وضعیت",
+      description: "قفل یا بازکردن وضعیت",
+      onClick: (item) => alert(`Change status clicked for ${item.userName}`),
+    },
+    {
+      icon: <EyeOutlined />,
+      title: "مشاهده",
+      description: "مشاهده جزئیات",
+      onClick: (item) => alert(`View clicked for ${item.userName}`),
+    },
+    {
+      icon: <EditOutlined />,
+      title: "ویرایش",
+      description: "ویرایش اطلاعات",
+      onClick: (item) => alert(`Edit clicked for ${item.userName}`),
+    },
+    {
+      icon: <DeleteOutlined />,
+      title: "حذف",
+      description: "حذف آیتم",
+      red: true,
+      onClick: (item) => alert(`Delete clicked for ${item.userName}`),
+    },
+  ];
+
   if (isLoading)
     return <div className="loading-spinner">در حال بارگذاری...</div>;
   if (isError) return <div className="error-message">خطا: {error.message}</div>;
@@ -63,6 +102,7 @@ const ShowUserTabel = () => {
       setPage={setPageIndex}
       pageSize={pageSize}
       setPageSize={setPageSize}
+      actionButtons={actionButtons} // ارسال دکمه‌ها
     />
   );
 };

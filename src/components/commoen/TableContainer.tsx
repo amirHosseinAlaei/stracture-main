@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
+
+interface Column {
+  key: string;
+  label: string;
+}
+
+interface TabelContainerProps {
+  initialColumns: Column[];
+  data: any[];
+  totalCount: number;
+  searchInput: string;
+  setSearchInput: (val: string) => void;
+  setSearch: (val: string) => void;
+  page: number;
+  setPage: (val: number) => void;
+  pageSize: number;
+  setPageSize: (val: number) => void;
+  actionButtons?: React.ReactNode;
+}
 
 function TabelContainer({
   initialColumns,
@@ -15,20 +34,26 @@ function TabelContainer({
   setPage,
   pageSize,
   setPageSize,
-}) {
-  const columns = initialColumns;
+  actionButtons,
+}: TabelContainerProps) {
+  // استیت محلی برای نگهداری ترتیب ستون‌ها
+  const [columns, setColumns] = useState(initialColumns);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handlePageSizeChange = (e) => {
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = Number(e.target.value);
     setPageSize(newSize);
-    setPage(1); // وقتی سایز صفحه تغییر می‌کند، صفحه را به 1 برگردان
+    setPage(1);
   };
 
   const handleSearchClick = () => {
-    setPage(1); // وقتی جستجو انجام می‌شود، صفحه را به 1 برگردان
+    setPage(1);
     setSearch(searchInput);
+  };
+
+  const handleColumnsReorder = (newColumns: Column[]) => {
+    setColumns(newColumns);
   };
 
   return (
@@ -50,7 +75,7 @@ function TabelContainer({
                   setSearch("");
                 }
               }}
-              className="w-full py-2 pl-10 pr-4    bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full py-2 pl-10 pr-4 bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="جستجو در تمام فیلدها"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -58,7 +83,6 @@ function TabelContainer({
                 }
               }}
             />
-        
             <button
               onClick={handleSearchClick}
               className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
@@ -73,8 +97,14 @@ function TabelContainer({
       {/* جدول */}
       <div className="overflow-x-auto rounded-xl shadow-sm mb-4">
         <table className="table-auto w-full rounded border-none">
-          <UserTableThead columns={columns} />
-          <UserTableTbody items={data} columns={columns} page={page} pageSize={pageSize} />
+          <UserTableThead columns={columns} onColumnsReorder={handleColumnsReorder} />
+          <UserTableTbody
+            items={data}
+            columns={columns}
+            page={page}
+            pageSize={pageSize}
+            actionButtons={actionButtons}
+          />
         </table>
       </div>
 
@@ -119,7 +149,7 @@ function TabelContainer({
         </button>
 
         <div className="p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center">
-          <label htmlFor="pageSizeSelect" className="font-medium">
+          <label htmlFor="pageSizeSelect" className="font-medium mr-2">
             سطرها
           </label>
           <select

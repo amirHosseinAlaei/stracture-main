@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import ActionButtons from "./TabelActions";
 import {
   getTypeLabel,
   getStatusLabel,
   getTwoFactorLabel,
 } from "../../utils/TabelNum";
+import ActionButtons from "./TabelActions";
 
-function UserTableTbody({ items, columns, page, pageSize }) {
+function UserTableTbody({ items, columns, page, pageSize, actionButtons }) {
   const [expandedRow, setExpandedRow] = useState(null);
 
   const toggleExpand = (id) => {
@@ -63,7 +63,10 @@ function UserTableTbody({ items, columns, page, pageSize }) {
               </td>
             ))}
             <td className="p-4">
-              <ActionButtons />
+              <ActionButtons buttons={actionButtons.map(btn => ({
+                ...btn,
+                onClick: () => btn.onClick(item)
+              }))} />
             </td>
           </tr>
           {expandedRow === item.id && (

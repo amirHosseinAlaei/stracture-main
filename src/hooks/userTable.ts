@@ -4,7 +4,7 @@ import getUsers from "../service/userFilter";
 export const UserTable = () => {
   const pageIndex = 1;
   const pageSize = 20;
-  const search = "ali";
+  const search = "";
 
   return useQuery({
     queryKey: ["getUsers", pageIndex, pageSize, search],
