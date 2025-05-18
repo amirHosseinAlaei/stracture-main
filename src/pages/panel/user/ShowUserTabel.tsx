@@ -16,12 +16,13 @@ const ShowUserTabel = () => {
 
   const initialSearch = searchParams.get("search") || "";
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
-  const initialPageSize = parseInt(searchParams.get("pageSize") || "5", 10);
+  const initialPageSize = parseInt(searchParams.get("pageSize") || "21", 10);
 
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [search, setSearch] = useState(initialSearch);
   const [pageIndex, setPageIndex] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
+  const [filters, setFilters] = useState({ type: null, status: null, twoFactorEnabled: null });
 
   useEffect(() => {
     const params = {};
@@ -33,17 +34,30 @@ const ShowUserTabel = () => {
   }, [search, pageIndex, pageSize, setSearchParams]);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["users", pageIndex, pageSize, search],
+    queryKey: ["users", pageIndex, pageSize, search, filters],
     queryFn: () =>
-      getUsers({ PageIndex: pageIndex, PageSize: pageSize, Search: search }),
+      getUsers({
+        PageIndex: pageIndex,
+        PageSize: pageSize,
+        Search: search,
+        Type: filters.type,
+        Status: filters.status,
+        TwoFactorEnabled: filters.twoFactorEnabled,
+      }),
     staleTime: 1000 * 60 * 5,
     retry: 1,
-    keepPreviousData: true,
   });
 
+  // اگر API فیلترها رو ساپورت نمی‌کند، فیلتر سمت کلاینت:
+  const filteredData = data?.data?.items.filter(item => {
+    return (
+      (filters.type == null || item.type === filters.type) &&
+      (filters.status == null || item.status === filters.status) &&
+      (filters.twoFactorEnabled == null || item.twoFactorEnabled === filters.twoFactorEnabled)
+    );
+  }) || [];
+
   const columns = [
-    { key: "userName", label: "نام کاربری" },
-    { key: "firstName", label: "نام" },
     { key: "lastName", label: "نام خانوادگی" },
     { key: "mobile", label: "موبایل" },
     { key: "type", label: "سامانه" },
@@ -51,20 +65,8 @@ const ShowUserTabel = () => {
     { key: "twoFactorEnabled", label: "ورود دو مرحله ای" },
   ];
 
-  // تعریف دکمه‌های داینامیک با عملکرد نمونه
   const actionButtons = [
-    {
-      icon: <SafetyCertificateOutlined />,
-      title: "امنیت",
-      description: "تنظیمات امنیتی",
-      onClick: (item) => alert(`Security clicked for ${item.userName}`),
-    },
-    {
-      icon: <LockOutlined />,
-      title: "تغییر وضعیت",
-      description: "قفل یا بازکردن وضعیت",
-      onClick: (item) => alert(`Change status clicked for ${item.userName}`),
-    },
+ 
     {
       icon: <EyeOutlined />,
       title: "مشاهده",
@@ -92,17 +94,18 @@ const ShowUserTabel = () => {
 
   return (
     <TabelContainer
-    initialColumns={columns}
-    data={data?.data?.items || []}
-    totalCount={data?.data?.totalCount || 0}
-    searchInput={searchInput}
-    setSearchInput={setSearchInput}
-    setSearch={setSearch}
-    page={pageIndex}
-    setPage={setPageIndex}
-    pageSize={pageSize}
-    setPageSize={setPageSize}
-      actionButtons={actionButtons} // ارسال دکمه‌ها
+      initialColumns={columns}
+      data={filteredData}
+      totalCount={filteredData.length}
+      searchInput={searchInput}
+      setSearchInput={setSearchInput}
+      setSearch={setSearch}
+      page={pageIndex}
+      setPage={setPageIndex}
+      pageSize={pageSize}
+      setPageSize={setPageSize}
+      actionButtons={actionButtons}
+      onFilterChange={setFilters}
     />
   );
 };

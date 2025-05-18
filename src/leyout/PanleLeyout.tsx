@@ -52,6 +52,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
       style={{
         direction: "rtl",
       }}
+    
     >
       <Layout>
         <Sider
@@ -59,7 +60,6 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           style={{ background: "#fff" }}
           breakpoint="lg"
           className="transition-all hidden md:block duration-300"
-          
         >
           <SidebarContent
             openKeys={openKeys}

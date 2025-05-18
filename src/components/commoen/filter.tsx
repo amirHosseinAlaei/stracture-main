@@ -17,14 +17,14 @@ const FilterModal = ({ handleFilterApply, handleFilterCancel, initialValues }) =
   return (
     <>
       <hr className="mt-4" />
-      <div className="mt-5 justify-center flex flex-col">
-        <div className="">
-          <span>سامانه</span>
+      <div className="mt-5 justify-center flex flex-col gap-4">
+        <div>
+          <span>وضعیت کاربران</span>
           <Select
-            placeholder="جستجو سامانه"
-            className="w-full mt-3 "
-            value={values.systems === undefined ? null : values.systems}
-            onChange={(value) => handleSetValue({ ...values, systems: value })}
+            placeholder="لطفا انتخاب کنید"
+            className="w-full mt-3"
+            value={values.status === undefined ? null : values.status}
+            onChange={(value) => handleSetValue({ ...values, status: value })}
             options={[
               { value: null, label: "همه" },
               { value: 1, label: "فعال" },
@@ -32,11 +32,11 @@ const FilterModal = ({ handleFilterApply, handleFilterCancel, initialValues }) =
             ]}
           />
         </div>
-        <div className="mt-4">
+        <div>
           <span>نوع کاربر</span>
           <Select
             placeholder="لطفا انتخاب کنید"
-            className="w-full mt-3 "
+            className="w-full mt-3"
             value={values.type === undefined ? null : values.type}
             onChange={(value) => handleSetValue({ ...values, type: value })}
             options={[
@@ -46,23 +46,30 @@ const FilterModal = ({ handleFilterApply, handleFilterCancel, initialValues }) =
             ]}
           />
         </div>
-        <br />
+        <div>
+          <span>ورود دو مرحله ای</span>
+          <Select
+            placeholder="لطفا انتخاب کنید"
+            className="w-full mt-3"
+            value={values.twoFactorEnabled === undefined ? null : values.twoFactorEnabled}
+            onChange={(value) => handleSetValue({ ...values, twoFactorEnabled: value })}
+            options={[
+              { value: null, label: "همه" },
+              { value: true, label: "فعال" },
+              { value: false, label: "غیرفعال" },
+            ]}
+          />
+        </div>
       </div>
-      <div className=" flex-row-reverse flex ">
+      <div className="flex flex-row-reverse mt-6 gap-3">
         <Button
-          className=" font-bold px-10 p-4 bg-blue-800"
-          key="apply"
+          className="font-bold px-10 p-4 bg-blue-800"
           type="primary"
           onClick={() => handleFilterApply(values)}
         >
           اعمال فیلتر
         </Button>
-
-        <Button
-          className="bg-gray-100 mr-3"
-          key="cancel"
-          onClick={handleFilterCancel}
-        >
+        <Button className="bg-gray-100" onClick={handleFilterCancel}>
           انصراف
         </Button>
       </div>

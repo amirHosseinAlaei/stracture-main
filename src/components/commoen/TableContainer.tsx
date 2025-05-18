@@ -23,6 +23,7 @@ interface TabelContainerProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   actionButtons?: React.ReactNode;
+  onFilterChange?: (filters: any) => void; // اضافه شده برای ارسال فیلتر به والد
 }
 
 function TabelContainer({
@@ -37,6 +38,7 @@ function TabelContainer({
   pageSize,
   setPageSize,
   actionButtons,
+  onFilterChange,
 }: TabelContainerProps) {
   const [columns, setColumns] = useState(initialColumns);
 
@@ -63,8 +65,7 @@ function TabelContainer({
   const handleFilterApply = (values: any) => {
     setFilterValues(values);
     setIsFilterModalVisible(false);
-    // اینجا می‌توانی فیلترها را اعمال کنی، مثلاً داده‌ها را فیلتر کنی یا درخواست جدید بزنی
-    // مثلا: setSearchWithFilters(values)
+    if (onFilterChange) onFilterChange(values);
   };
 
   const handleFilterCancel = () => {
@@ -106,12 +107,10 @@ function TabelContainer({
             >
               جستجو
             </button>
-
           </div>
-            <Button className="!h-12" onClick={() => setIsFilterModalVisible(true)}>
-
-               <i className="fa fa-filter"></i> 
-            </Button>
+          <Button className="!h-12" onClick={() => setIsFilterModalVisible(true)}>
+            <i className="fa fa-filter"></i>
+          </Button>
         </div>
         <div className="text-gray-500">تعداد کل : {totalCount}</div>
       </div>
