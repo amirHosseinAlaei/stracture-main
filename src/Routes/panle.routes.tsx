@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import PanelLayout from "../leyout/PanleLeyout"; // اصلاح نام
 import Loading from "../components/commoen/Loading"; // اصلاح نام
+import GeneralInfoForm from "../components/commoen/FormAddEditUser";
 
 const PanelEmpty = lazy(() =>
   import("../pages/panel/cleanroom/PanelEmpty")
@@ -16,6 +17,7 @@ const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const PanelRoutes = {
+
   path: "/panel", // اصلاح نام
   element: <PanelLayout />,
   children: [
@@ -35,6 +37,7 @@ const PanelRoutes = {
         <SuspenseWrapper>
           <ShowUserTabel />
         </SuspenseWrapper>
+        
       ),
     },
     {
@@ -67,6 +70,28 @@ const PanelRoutes = {
         <SuspenseWrapper>
           <ShowUserTabel />
         </SuspenseWrapper>
+      ),
+
+
+    },
+      {
+      path: "settings",
+      element: (
+        <SuspenseWrapper>
+          <ShowUserTabel />
+        </SuspenseWrapper>
+      ),
+
+      
+    },
+
+     {
+      path: "users/folan",
+      element: (
+        <SuspenseWrapper>
+          <GeneralInfoForm />
+        </SuspenseWrapper>
+        
       ),
     },
   ],

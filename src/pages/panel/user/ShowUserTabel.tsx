@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
@@ -9,28 +9,29 @@ import {
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
-const ShowUserTabel = () => {
+interface ShowUserTabelProps {
+  setButtonText?: (text: string) => void;
+}
+
+const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (setButtonText) {
+      setButtonText("سلام"); // اینجا متن دکمه را از این کامپوننت تعیین می‌کنیم
+    }
+  }, [setButtonText]);
 
   const initialSearch = searchParams.get("search") || "";
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
   const initialPageSize = parseInt(searchParams.get("pageSize") || "5", 10);
 
-  const [searchInput, setSearchInput] = useState(initialSearch);
-  const [search, setSearch] = useState(initialSearch);
-  const [pageIndex, setPageIndex] = useState(initialPage);
-  const [pageSize, setPageSize] = useState(initialPageSize);
-
-  useEffect(() => {
-    const params = {};
-    if (search) params.search = search;
-    if (pageIndex && pageIndex > 1) params.page = pageIndex.toString();
-    if (pageSize && pageSize !== 5) params.pageSize = pageSize.toString();
-
-    setSearchParams(params);
-  }, [search, pageIndex, pageSize, setSearchParams]);
+  const [searchInput, setSearchInput] = React.useState(initialSearch);
+  const [search, setSearch] = React.useState(initialSearch);
+  const [pageIndex, setPageIndex] = React.useState(initialPage);
+  const [pageSize, setPageSize] = React.useState(initialPageSize);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users", pageIndex, pageSize, search],
@@ -51,44 +52,42 @@ const ShowUserTabel = () => {
     { key: "twoFactorEnabled", label: "ورود دو مرحله ای" },
   ];
 
-  // تعریف دکمه‌های داینامیک با عملکرد نمونه
   const actionButtons = [
     {
       icon: <SafetyCertificateOutlined />,
       title: "امنیت",
       description: "تنظیمات امنیتی",
-      onClick: (item) => alert(`Security clicked for ${item.userName}`),
+      onClick: (item: any) => alert(`Security clicked for ${item.id}`),
     },
     {
       icon: <LockOutlined />,
       title: "تغییر وضعیت",
       description: "قفل یا بازکردن وضعیت",
-      onClick: (item) => alert(`Change status clicked for ${item.userName}`),
+      onClick: (item: any) => alert(`Change status clicked for ${item.id}`),
     },
     {
       icon: <EyeOutlined />,
       title: "مشاهده",
       description: "مشاهده جزئیات",
-      onClick: (item) => alert(`View clicked for ${item.userName}`),
+      onClick: (item: any) => alert(`View clicked for ${item.id}`),
     },
     {
       icon: <EditOutlined />,
       title: "ویرایش",
       description: "ویرایش اطلاعات",
-      onClick: (item) => alert(`Edit clicked for ${item.userName}`),
+      onClick: (item: any) => alert(`Edit clicked for ${item.id}`),
     },
     {
       icon: <DeleteOutlined />,
       title: "حذف",
       description: "حذف آیتم",
       red: true,
-      onClick: (item) => alert(`Delete clicked for ${item.userName}`),
+      onClick: (item: any) => alert(`Delete clicked for ${item.id}`),
     },
   ];
 
-  if (isLoading)
-    return <div className="loading-spinner">در حال بارگذاری...</div>;
-  if (isError) return <div className="error-message">خطا: {error.message}</div>;
+  if (isLoading) return <div className="loading-spinner">در حال بارگذاری...</div>;
+  if (isError) return <div className="error-message">خطا: {error?.message}</div>;
 
   return (
     <TabelContainer
@@ -102,7 +101,7 @@ const ShowUserTabel = () => {
       setPage={setPageIndex}
       pageSize={pageSize}
       setPageSize={setPageSize}
-      actionButtons={actionButtons} // ارسال دکمه‌ها
+      actionButtons={actionButtons}
     />
   );
 };

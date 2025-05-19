@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Tooltip } from 'antd';
-
 const ActionButtons = ({ buttons }) => {
   const [hoverIndex, setHoverIndex] = useState(null);
-
   return (
     <div className="flex justify-center items-center gap-3">
       {buttons.map((btn, index) => (
@@ -27,5 +25,4 @@ const ActionButtons = ({ buttons }) => {
     </div>
   );
 };
-
 export default ActionButtons;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Breadcrumb, Drawer } from "antd";
+import { Layout, Breadcrumb, Drawer, Button } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import SidebarContent from "../pages/panel/sidebar/Sidebar";
 import { Outlet } from "react-router-dom";
@@ -59,7 +59,6 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           style={{ background: "#fff" }}
           breakpoint="lg"
           className="transition-all hidden md:block duration-300"
-          
         >
           <SidebarContent
             openKeys={openKeys}
@@ -92,37 +91,47 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
         </Drawer>
 
         <Layout style={{ padding: "0 24px 24px" }}>
-          <div className="flex jc gap-4 items-center">
-            {/* دکمه باز کردن منوی موبایل */}
+          <div className="flex justify-center gap-4  items-center">
             <button
               onClick={onOpen}
               className="!rounded-md hover:text-blue-00   duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
             >
               <MenuOutlined className="text-lg" />
             </button>
+            <div className=" p-2 w-full justify-between items-center  flex "> 
 
-            <div>
-              <Breadcrumb
-                items={[
-                  { title: "خانه" },
-                  { title: "لیست" },
-                  { title: "اپلیکیشن" },
-                ]}
-                style={{ margin: "16px 0" }}
-              />
+
+              <div className=" ">
+                <Breadcrumb
+                  items={[
+                    { title: "خانه" },
+                    { title: "لیست" },
+                    { title: "اپلیکیشن" },
+                  ]}
+                  style={{ margin: "16px 0" }}
+                />
+              </div>
+
+              <div dir="ltr" className="  ">
+                <Button type="primary" className="!px-12 text-white  !p-5">
+                  
+                  ثبت کاربر جدید
+                </Button>
+
+              </div>
             </div>
           </div>
 
-          {/* محتوای اصلی */}
+{/*  */}
           <Content
             className=""
             style={{
-              padding: 24,
               background: "#fff",
               borderRadius: "8px",
             }}
           >
-            <Outlet />
+            
+             < Outlet />
           </Content>
         </Layout>
       </Layout>

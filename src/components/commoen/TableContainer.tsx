@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
+import { Button } from "antd";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
@@ -58,8 +59,9 @@ function TabelContainer({
 
   return (
     <div className="px-5 py-4">
-      {/* بخش جستجو */}
-      <div className="flex justify-between mb-6">
+   
+      <div className="flex justify-between  items-center mb-6">
+        
         <div className="flex gap-2 items-center">
           <label htmlFor="search" className="font-medium text-gray-700">جستجو:</label>
           <div className="relative border rounded-md shadow border-slate-200 p-2 w-80 flex items-center gap-2">
