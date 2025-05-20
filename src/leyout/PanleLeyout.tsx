@@ -48,17 +48,13 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
 
   return (
     <Layout
-      className=" "
-      style={{
-        direction: "rtl",
-      }}
     >
-      <Layout>
+      <Layout style={{
+      }}>
         <Sider
           width={200}
-          style={{ background: "#fff" }}
           breakpoint="lg"
-          className="transition-all hidden md:block duration-300"
+          className="transition-all hidden md:block duration-300 !bg-white"
         >
           <SidebarContent
             openKeys={openKeys}
@@ -90,7 +86,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Drawer>
 
-        <Layout style={{ padding: "0 24px 24px" }}>
+        <Layout   className="h-screen" style={{ padding: "0 24px 24px", height: '100%' }}>
           <div className="flex justify-center gap-4  items-center">
             <button
               onClick={onOpen}
@@ -123,7 +119,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           </div>
 
 {/*  */}
-          <Content
+          <Content 
             className=""
             style={{
               background: "#fff",

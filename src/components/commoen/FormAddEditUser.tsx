@@ -429,13 +429,14 @@ const GeneralInfoFormWithDrawer = () => {
           <SectionTitle title="بارگذاری تصویر" />
 
           <Form.Item
+          className="!mb-12"
             name="upload"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             rules={[{ validator: validateFile }]}
           >
             <>
-              <Dragger
+              <Dragger className=""
                 name="files"
                 multiple
                 beforeUpload={() => false}
@@ -525,7 +526,7 @@ const GeneralInfoFormWithDrawer = () => {
 
       <div
         dir="ltr"
-        className="sticky bottom-0 w-full left-0 right-0 bg-white shadow-2xl p-4 flex justify-between items-center z-50"
+        className="fixed    bottom-0  w-[100%] md:w-[88.3%]  left-0   bg-white shadow-2xl p-4 flex justify-between items-center z-50"
       >
         <div className="flex gap-4">
           <Button
@@ -541,7 +542,7 @@ const GeneralInfoFormWithDrawer = () => {
             icon={<ArrowLeftOutlined />}
             onClick={() => window.history.back()}
             type="text"
-            className="!px-8 !py-4 !bg-gray-200 hover:!bg-gray-300 min-w-[90px]"
+            className="!px-8  !hidden  md:!flex !py-4 !bg-gray-200 hover:!bg-gray-300 min-w-[90px]"
           >
             بازگشت
           </Button>

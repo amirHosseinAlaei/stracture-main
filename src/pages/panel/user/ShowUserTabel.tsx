@@ -71,6 +71,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       description: "مشاهده جزئیات",
       onClick: (item: any) => alert(`View clicked for ${item.id}`),
     },
+    
     {
       icon: <EditOutlined />,
       title: "ویرایش",

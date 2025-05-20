@@ -82,7 +82,7 @@ const SidebarContent = ({
   );
 
   const AccountButtons = (
-    <div className="hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] bg-white">
+    <div className="hidden lg:flex flex-col items-center pt-6 pb-3 border-b w-full border-b-[#eee] e">
       <Button
         type="text"
         icon={<UserOutlined />}
@@ -153,7 +153,7 @@ const SidebarContent = ({
           setSelectedKeys([key]);
           if (isMobile) onClose();
         }}
-        style={{ height: "100%", borderRight: 0 }}
+        style={{ borderRight: 0 }}
         items={items}
       />
     </>
