@@ -47,7 +47,7 @@ function PanelEmpty() {
   const [rotation, setRotation] = useState(0);
   const [hoverIndex, setHoverIndex] = useState(null);
 
-  const rotationSpeed = 0.05; // ! speed round
+  const rotationSpeed = 0.02// ! speed round
   const hoverText = hoverIndex !== null ? hoverTexts[hoverIndex] : "";
 
   const animate = () => {
