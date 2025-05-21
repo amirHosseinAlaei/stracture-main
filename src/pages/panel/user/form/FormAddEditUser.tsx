@@ -20,11 +20,11 @@ import {
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
-import Driverguide from "../../utils/Driverguide";
+import Driverguide from "../../../../utils/Driverguide";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiPostUser, apiUpdateUser } from "../../service/postUser";
+import { apiPostUser, apiUpdateUser } from "../../../../service/postUser";
 import { useParams } from "react-router-dom";
-import getUserById from "../../service/getUSerid";
+import getUserById from "../../../../service/getUSerid";
 
 const { Dragger } = Upload;
 
@@ -43,9 +43,9 @@ const SectionTitle = ({ title }) => (
   </div>
 );
 
-const SESSION_STORAGE_KEY = "generalInfoFormData";
-const SESSION_STORAGE_BIRTHDATE_KEY = "generalInfoFormBirthDate";
-const SESSION_STORAGE_FILELIST_KEY = "generalInfoFormFileList";
+// const SESSION_STORAGE_KEY = "generalInfoFormData";
+// const SESSION_STORAGE_BIRTHDATE_KEY = "generalInfoFormBirthDate";
+// const SESSION_STORAGE_FILELIST_KEY = "generalInfoFormFileList";
 
 const GeneralInfoFormWithDrawer = () => {
   const { id } = useParams();
@@ -105,17 +105,21 @@ const GeneralInfoFormWithDrawer = () => {
   //   sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(allValues));
   // };
 
+  useEffect(() => {
+    form.setFieldsValue(data);
+  }, [id, data]);
+
   const onBirthDateChange = (date) => {
     setBirthDate(date);
     if (birthDateError) setBirthDateError(null);
-    if (date) {
-      sessionStorage.setItem(
-        SESSION_STORAGE_BIRTHDATE_KEY,
-        JSON.stringify(date.toJSON())
-      );
-    } else {
-      sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    }
+    // if (date) {
+    //   sessionStorage.setItem(
+    //     SESSION_STORAGE_BIRTHDATE_KEY,
+    //     JSON.stringify(date.toJSON())
+    //   );
+    // } else {
+    //   sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
+    // }
   };
 
   // useMutation برای ارسال فرم
@@ -185,9 +189,9 @@ const GeneralInfoFormWithDrawer = () => {
     setFileList([]);
     setErrorFiles([]);
     setPreviewUrls([]);
-    sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
+    // sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    // sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
+    // sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
   };
 
   const handleChange = (info) => {
@@ -221,10 +225,10 @@ const GeneralInfoFormWithDrawer = () => {
       type: file.type,
       url: file.url || file.preview,
     }));
-    sessionStorage.setItem(
-      SESSION_STORAGE_FILELIST_KEY,
-      JSON.stringify(filesToSave)
-    );
+    // sessionStorage.setItem(
+    //   SESSION_STORAGE_FILELIST_KEY,
+    //   JSON.stringify(filesToSave)
+    // );
   };
 
   const handleRemoveImage = (uid) => {
@@ -243,10 +247,10 @@ const GeneralInfoFormWithDrawer = () => {
       type: file.type,
       url: file.url || file.preview,
     }));
-    sessionStorage.setItem(
-      SESSION_STORAGE_FILELIST_KEY,
-      JSON.stringify(filesToSave)
-    );
+    // sessionStorage.setItem(
+    //   SESSION_STORAGE_FILELIST_KEY,
+    //   JSON.stringify(filesToSave)
+    // );
   };
 
   if (data && id) {
@@ -266,6 +270,7 @@ const GeneralInfoFormWithDrawer = () => {
           // onValuesChange={onValuesChange}
         >
           <Row gutter={16}>
+            {/* nationalCode */}
             <Col span={6}>
               <Form.Item
                 label="کد ملی"
@@ -312,6 +317,7 @@ const GeneralInfoFormWithDrawer = () => {
               </Form.Item>
             </Col>
 
+            {/* firstName */}
             <Col span={6}>
               <Form.Item
                 label="نام"
@@ -321,7 +327,8 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-
+            
+            {/* lastName */}
             <Col span={6}>
               <Form.Item
                 label="نام خانوادگی"
