@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
@@ -18,20 +18,40 @@ interface ShowUserTabelProps {
 const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    if (setButtonText) {
-      setButtonText("سلام"); // اینجا متن دکمه را از این کامپوننت تعیین می‌کنیم
-    }
-  }, [setButtonText]);
-
+  // گرفتن مقدار اولیه از URL
   const initialSearch = searchParams.get("search") || "";
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
   const initialPageSize = parseInt(searchParams.get("pageSize") || "5", 10);
 
-  const [searchInput, setSearchInput] = React.useState(initialSearch);
-  const [search, setSearch] = React.useState(initialSearch);
-  const [pageIndex, setPageIndex] = React.useState(initialPage);
-  const [pageSize, setPageSize] = React.useState(initialPageSize);
+  const [searchInput, setSearchInput] = useState(initialSearch);
+  const [search, setSearch] = useState(initialSearch);
+  const [pageIndex, setPageIndex] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+
+  // sync شدن state ها با URL (وقتی URL دستی تغییر کند)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    const urlPage = parseInt(searchParams.get("page") || "1", 10);
+    const urlPageSize = parseInt(searchParams.get("pageSize") || "5", 10);
+
+    setSearchInput(urlSearch);
+    setSearch(urlSearch);
+    setPageIndex(urlPage);
+    setPageSize(urlPageSize);
+  }, [searchParams]);
+
+  // فقط وقتی search عوض شد (یعنی کاربر اینتر زد)، URL را sync کن
+  useEffect(() => {
+    setSearchParams({
+      page: pageIndex.toString(),
+      pageSize: pageSize.toString(),
+      search: search,
+    });
+  }, [pageIndex, pageSize, search, setSearchParams]);
+
+  useEffect(() => {
+    setButtonText?.("سلام");
+  }, [setButtonText]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users", pageIndex, pageSize, search],
@@ -41,6 +61,14 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
     retry: 1,
     keepPreviousData: true,
   });
+
+  // هندل کردن اینتر در input سرچ
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearch(searchInput);
+      setPageIndex(1); // معمولاً وقتی سرچ جدید انجام می‌دیم، صفحه رو به اول برمی‌گردونیم
+    }
+  };
 
   const columns = [
     { key: "userName", label: "نام کاربری" },
@@ -71,7 +99,6 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       description: "مشاهده جزئیات",
       onClick: (item: any) => alert(`View clicked for ${item.id}`),
     },
-    
     {
       icon: <EditOutlined />,
       title: "ویرایش",
@@ -87,7 +114,6 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
     },
   ];
 
-  if (isLoading) return <div className="loading-spinner">در حال بارگذاری...</div>;
   if (isError) return <div className="error-message">خطا: {error?.message}</div>;
 
   return (
@@ -97,6 +123,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       totalCount={data?.data?.totalCount || 0}
       searchInput={searchInput}
       setSearchInput={setSearchInput}
+      onSearchKeyDown={handleSearchKeyDown}
       setSearch={setSearch}
       page={pageIndex}
       setPage={setPageIndex}

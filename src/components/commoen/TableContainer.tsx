@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import UserTableTbody from "./Tbody";
 import UserTableThead from "./Tead";
-import { Button } from "antd";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
@@ -37,7 +36,6 @@ function TabelContainer({
   setPageSize,
   actionButtons,
 }: TabelContainerProps) {
-  // استیت محلی برای نگهداری ترتیب ستون‌ها
   const [columns, setColumns] = useState(initialColumns);
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -59,13 +57,16 @@ function TabelContainer({
 
   return (
     <div className="px-5 py-4">
-   
-      <div className="flex justify-between  items-center mb-6">
-        
+      <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-50 px-2  py-3">
+
         <div className="flex gap-2 items-center">
+          
           <label htmlFor="search" className="font-medium text-gray-700">جستجو:</label>
-          <div className="relative border rounded-md shadow border-slate-200 p-2 w-80 flex items-center gap-2">
+          
+          <div className="relative border rounded-md  shadow border-slate-200 p-2 w-80 flex items-center gap-2">
+            
             <input
+            
               id="search"
               type="text"
               value={searchInput}
@@ -77,7 +78,7 @@ function TabelContainer({
                   setSearch("");
                 }
               }}
-              className="w-full py-2 pl-10 pr-4 bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full py-2 pl-10  pr-4 bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="جستجو در تمام فیلدها"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -91,15 +92,21 @@ function TabelContainer({
             >
               جستجو
             </button>
+            
           </div>
         </div>
         <div className="text-gray-500">تعداد کل : {totalCount}</div>
       </div>
 
-      {/* جدول */}
-      <div className="overflow-x-auto rounded-xl shadow-sm mb-4">
+      {/* جدول با overflow-x */}
+      <div className="overflow-x-auto  bg rounded-xl shadow-sm mb-4">
         <table className="table-auto w-full rounded border-none">
-          <UserTableThead columns={columns} onColumnsReorder={handleColumnsReorder} />
+          {/* هدر جدول استیکی */}
+          <UserTableThead
+            columns={columns}
+            onColumnsReorder={handleColumnsReorder}
+            className="sticky top-16 bg-white z-40"
+          />
           <UserTableTbody
             items={data}
             columns={columns}

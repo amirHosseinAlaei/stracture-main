@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Drawer,
   Form,
   Input,
   Button,
@@ -9,75 +8,29 @@ import {
   Radio,
   Upload,
   Typography,
+  message,
+  TimePicker,
 } from "antd";
 import {
   InboxOutlined,
   UndoOutlined,
   ArrowLeftOutlined,
-  CloseOutlined,
   CloseCircleOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import Driverguide from "../../utils/Driverguide";
+import { useMutation } from "@tanstack/react-query";
+import postUser from "../../service/postUser";
 
 const { Dragger } = Upload;
 const { Title } = Typography;
 
 const onlyNumbers = (value) => value.replace(/\D/g, "");
 
-const validateNationalCode = (_, value) => {
-  if (!value) return Promise.reject(new Error("لطفا کد ملی را وارد کنید"));
-  if (!/^\d{10}$/.test(value))
-    return Promise.reject(new Error("کد ملی باید ۱۰ رقم عدد باشد"));
-  const check = +value[9];
-  const sum = value
-    .split("")
-    .slice(0, 9)
-    .reduce((acc, num, i) => acc + +num * (10 - i), 0);
-  const remainder = sum % 11;
-  if (
-    (remainder < 2 && check === remainder) ||
-    (remainder >= 2 && check === 11 - remainder)
-  ) {
-    return Promise.resolve();
-  }
-  return Promise.reject(new Error("کد ملی وارد شده معتبر نیست"));
-};
-
-const validateMobile = (_, value) => {
-  if (!value)
-    return Promise.reject(new Error("لطفا شماره موبایل را وارد کنید"));
-  if (!/^09\d{9}$/.test(value))
-    return Promise.reject(
-      new Error("شماره موبایل باید ۱۱ رقم و با 09 شروع شود")
-    );
-  return Promise.resolve();
-};
-
 const MAX_IMAGES = 5;
-
-const validateFile = (_, fileList) => {
-  if (!fileList || fileList.length === 0) {
-    return Promise.reject(new Error("لطفا حداقل یک فایل تصویر بارگذاری کنید"));
-  }
-  if (fileList.length > MAX_IMAGES) {
-    return Promise.reject(
-      new Error(`حداکثر تعداد فایل مجاز ${MAX_IMAGES} عدد است`)
-    );
-  }
-  for (const file of fileList) {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      return Promise.reject(new Error("فقط فایل‌های تصویری مجاز هستند"));
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      return Promise.reject(new Error("حجم فایل باید کمتر از ۲ مگابایت باشد"));
-    }
-  }
-  return Promise.resolve();
-};
 
 const SectionTitle = ({ title }) => (
   <div className="flex items-center my-5 gap-4">
@@ -99,11 +52,10 @@ const GeneralInfoFormWithDrawer = () => {
   const [fileList, setFileList] = useState([]);
   const [errorFiles, setErrorFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Load saved data on mount
+  const [isAccessLimited, setIsAccessLimited] = useState(false);
+
   useEffect(() => {
-    // Load form values
     const savedForm = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (savedForm) {
       try {
@@ -111,8 +63,6 @@ const GeneralInfoFormWithDrawer = () => {
         form.setFieldsValue(parsed);
       } catch {}
     }
-
-    // Load birthDate
     const savedBirthDate = sessionStorage.getItem(
       SESSION_STORAGE_BIRTHDATE_KEY
     );
@@ -126,20 +76,16 @@ const GeneralInfoFormWithDrawer = () => {
         setBirthDate(dateObj);
       } catch {}
     }
-
-    // Load fileList
     const savedFiles = sessionStorage.getItem(SESSION_STORAGE_FILELIST_KEY);
     if (savedFiles) {
       try {
         const files = JSON.parse(savedFiles);
-        // Recreate preview URLs
         const previews = files.map((file) => {
-          // File object in sessionStorage won't have originFileObj, so preview url must be stored
           return { uid: file.uid, url: file.url };
         });
         setFileList(files);
         setPreviewUrls(previews);
-        form.setFieldsValue({ upload: files });
+        form.setFieldsValue({ AvatarFile: files });
       } catch {}
     }
   }, [form]);
@@ -161,7 +107,19 @@ const GeneralInfoFormWithDrawer = () => {
     }
   };
 
-  const onFinish = (values) => {
+  // useMutation برای ارسال فرم
+  const { mutateAsync, isLoading } = useMutation({
+    mutationFn: postUser,
+    onSuccess: () => {
+      message.success("اطلاعات با موفقیت ارسال شد");
+      onReset();
+    },
+    onError: () => {
+      message.error("ارسال اطلاعات با خطا مواجه شد");
+    },
+  });
+
+  const onFinish = async (values) => {
     if (!birthDate) {
       setBirthDateError("لطفا تاریخ تولد را انتخاب کنید");
       return;
@@ -172,12 +130,23 @@ const GeneralInfoFormWithDrawer = () => {
     const gregorian = birthDate.convert("gregorian");
     values.birthDate = gregorian.toDate().toISOString();
 
-    console.log("Form Values:", values);
+    const formData = new FormData();
+    Object.keys(values).forEach((key) => {
+      if (key === "AvatarFile" && Array.isArray(fileList)) {
+        fileList.forEach((file) => {
+          formData.append("AvatarFile", file.originFileObj || file);
+        });
+      } else {
+        formData.append(key, values[key]);
+      }
+    });
 
-    // Clear session storage on submit
-    sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
+    try {
+      await mutateAsync(formData);
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
+      sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
+    } catch {}
   };
 
   const onReset = () => {
@@ -214,9 +183,8 @@ const GeneralInfoFormWithDrawer = () => {
 
     const validFiles = files.filter((file) => file.size / 1024 / 1024 <= 2);
     setFileList(validFiles);
-    form.setFieldsValue({ upload: validFiles });
+    form.setFieldsValue({ AvatarFile: validFiles });
 
-    // Save files to sessionStorage (store minimal info)
     const filesToSave = validFiles.map((file) => ({
       uid: file.uid,
       name: file.name,
@@ -231,18 +199,14 @@ const GeneralInfoFormWithDrawer = () => {
   };
 
   const handleRemoveImage = (uid) => {
-    // حذف تصویر از fileList
     const newFileList = fileList.filter((file) => file.uid !== uid);
     setFileList(newFileList);
 
-    // حذف تصویر از previewUrls
     const newPreviewUrls = previewUrls.filter((img) => img.uid !== uid);
     setPreviewUrls(newPreviewUrls);
 
-    // به‌روزرسانی فرم
-    form.setFieldsValue({ upload: newFileList });
+    form.setFieldsValue({ AvatarFile: newFileList });
 
-    // به‌روزرسانی sessionStorage
     const filesToSave = newFileList.map((file) => ({
       uid: file.uid,
       name: file.name,
@@ -256,14 +220,6 @@ const GeneralInfoFormWithDrawer = () => {
     );
   };
 
-  const openDrawer = () => {
-    setIsDrawerOpen(true);
-  };
-
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-  };
-
   return (
     <div>
       <div className="min-h-screen p-4 flex flex-col relative">
@@ -272,18 +228,44 @@ const GeneralInfoFormWithDrawer = () => {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          name="my-form"
+          name="nationalCode"
           className="flex-grow"
           onValuesChange={onValuesChange}
         >
-          <SectionTitle title="اطلاعات سامانه" />
 
           <Row gutter={16}>
             <Col span={6}>
               <Form.Item
                 label="کد ملی"
                 name="nationalCode"
-                rules={[{ validator: validateNationalCode }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "لطفا کد ملی را وارد کنید",
+                  },
+                  {
+                    pattern: /^\d{10}$/,
+                    message: "کد ملی باید ۱۰ رقم عدد باشد",
+                  },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const check = +value[9];
+                      const sum = value
+                        .split("")
+                        .slice(0, 9)
+                        .reduce((acc, num, i) => acc + +num * (10 - i), 0);
+                      const remainder = sum % 11;
+                      if (
+                        (remainder < 2 && check === remainder) ||
+                        (remainder >= 2 && check === 11 - remainder)
+                      ) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject("کد ملی وارد شده معتبر نیست");
+                    },
+                  },
+                ]}
               >
                 <Input
                   maxLength={10}
@@ -336,7 +318,16 @@ const GeneralInfoFormWithDrawer = () => {
               <Form.Item
                 label="موبایل"
                 name="mobile"
-                rules={[{ validator: validateMobile }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "لطفا شماره موبایل را وارد کنید",
+                  },
+                  {
+                    pattern: /^09\d{9}$/,
+                    message: "شماره موبایل باید ۱۱ رقم و با 09 شروع شود",
+                  },
+                ]}
               >
                 <Input
                   maxLength={11}
@@ -366,6 +357,7 @@ const GeneralInfoFormWithDrawer = () => {
 
             <Col span={6}>
               <Form.Item
+                name="birthDate"
                 label="تاریخ تولد"
                 required
                 validateStatus={birthDateError ? "error" : ""}
@@ -394,49 +386,270 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="0">مرد</Radio>
-                  <Radio value="1">زن</Radio>
+                  <Radio value="1">مرد</Radio>
+                  <Radio value="0">زن</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
           </Row>
+          <SectionTitle title="اطلاعات سامانه" />
 
-          <Form.Item
-            className="mt-2"
-            label="نوع کاربر"
-            name="type"
-            rules={[
-              { required: true, message: "لطفا نوع کاربر را انتخاب کنید" },
-            ]}
-          >
-            <Radio.Group>
-              <Radio value="0">شهروند</Radio>
-              <Radio value="1">سازمانی</Radio>
-            </Radio.Group>
-          </Form.Item>
+{/* ردیف Radioها */}
+<Row gutter={16}>
+  <Col span={6}>
+    <Form.Item
+      label="نوع کاربر"
+      name="type"
+      rules={[
+        { required: true, message: "لطفا نوع کاربر را انتخاب کنید" },
+      ]}
+    >
+      <Radio.Group>
+        <Radio value="0">شهروند</Radio>
+        <Radio value="1">سازمانی</Radio>
+      </Radio.Group>
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="وضعیت"
+      name="status"
+      rules={[{ required: true, message: "لطفا وضعیت را انتخاب کنید" }]}
+    >
+      <Radio.Group>
+        <Radio value="1">فعال</Radio>
+        <Radio value="0">غیرفعال</Radio>
+      </Radio.Group>
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="ورود دو مرحله‌ای"
+      name="twoStepAuth"
+      rules={[{ required: true, message: "لطفا وضعیت ورود دو مرحله‌ای را انتخاب کنید" }]}
+    >
+      <Radio.Group>
+        <Radio value="1">فعال</Radio>
+        <Radio value="0">غیرفعال</Radio>
+      </Radio.Group>
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="دسترسی به وب‌سرویس"
+      name="webServiceAccess"
+      rules={[{ required: true, message: "لطفا وضعیت دسترسی به وب‌سرویس را انتخاب کنید" }]}
+    >
+      <Radio.Group>
+        <Radio value="1">دارد</Radio>
+        <Radio value="2">ندارد</Radio>
+      </Radio.Group>
+    </Form.Item>
+  </Col>
+</Row>
 
-          <div className="gap-4 flex">
-            سمت کاربر
-            <button
-              type="button"
-              className="bg-emerald-600 px-2 hover:bg-emerald-700 cursor-pointer duration-300 text-white rounded-lg"
-              onClick={openDrawer}
+{/* ردیف Inputها */}
+<Row gutter={16}>
+  <Col span={6}>
+    <Form.Item
+      label="نام کاربری"
+      name="username"
+      rules={[
+        { required: true, message: "نام کاربری الزامی است" },
+        { min: 3, message: "نام کاربری باید حداقل ۳ کاراکتر باشد" },
+      ]}
+    >
+      <Input allowClear />
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="رمز عبور"
+      name="password"
+      rules={[
+        { required: true, message: "رمز عبور الزامی است" },
+        { min: 6, message: "رمز عبور باید حداقل ۶ کاراکتر باشد" },
+        {
+          pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&*!]).{6,}$/,
+          message: "رمز عبور باید شامل حروف بزرگ، کوچک و یک کاراکتر خاص باشد",
+        },
+      ]}
+    >
+      <Input.Password allowClear />
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="استعلام ثبت حوال"
+      name="sabtHaval"
+    >
+      <Input disabled placeholder="مقدار استعلام ثبت حوال" />
+    </Form.Item>
+  </Col>
+  <Col span={6}>
+    <Form.Item
+      label="استعلام شاهکار"
+      name="shahkar"
+    >
+      <Input disabled placeholder="مقدار استعلام شاهکار" />
+    </Form.Item>
+  </Col>
+</Row>
+
+<div className="flex !items-center  flex-row gap-x-4 w-full">
+  {/* دکمه */}
+  <div className=" !flex  !justify-center text-center mt-6 !items-center">
+  <Button
+  type={isAccessLimited ? "primary" : "default"}
+  onClick={() => setIsAccessLimited((prev) => !prev)}
+  className={`mb-4 flex items-center !p-0  !rounded-2xl w-auto ${isAccessLimited ? 'flex-row' : 'flex-row-reverse'}`}
+>
+  <span
+    className={`inline-block w-7 h-7 rounded-full bg-white border border-gray-300
+      ${isAccessLimited ? 'mr-0 ml-2' : 'ml-0 mr-2'}`}
+  />
+  <span className="p-2 px-4">
+    {isAccessLimited ? "مجاز ورود در ساعات معین" : "تعیین نوع محدودیت ورود"}
+  </span>
+</Button>
+  </div>
+
+  {/* فرم */}
+  <div className="w-1/2">
+    <Row gutter={16}>
+      {isAccessLimited ? (
+        <>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت مجاز آغاز ورود"
+              name="allowedStartTime"
+              rules={[{ required: true, message: "لطفا ساعت مجاز آغاز ورود را انتخاب کنید" }]}
             >
-              راهنما
-            </button>
-          </div>
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 08:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت مجاز پایان ورود"
+              name="allowedEndTime"
+              rules={[{ required: true, message: "لطفا ساعت مجاز پایان ورود را انتخاب کنید" }]}
+            >
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 17:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+        </>
+      ) : (
+        <>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت غیرمجاز آغاز ورود"
+              name="forbiddenStartTime"
+              rules={[{ required: true, message: "لطفا ساعت غیرمجاز آغاز ورود را انتخاب کنید" }]}
+            >
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 23:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت غیرمجاز پایان ورود"
+              name="forbiddenEndTime"
+              rules={[{ required: true, message: "لطفا ساعت غیرمجاز پایان ورود را انتخاب کنید" }]}
+            >
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 06:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+        </>
+      )}
+    </Row>
+  </div>
+</div>
+
+
+<div className="mt-2 mb-6">
+<p>
+  IP های مجاز ورود (مثال:192.168.1.166)
+
+</p>
+
+<Input
+  className="!w-24 !mt-3"
+  placeholder="مثال: 192.168.1.166"
+  onKeyPress={e => {
+    if (!/[0-9.]/.test(e.key)) {
+      e.preventDefault();
+    }
+  }}
+/>
+
+
+</div>
+
+
+
+          
+          <Driverguide />
 
           <SectionTitle title="بارگذاری تصویر" />
 
           <Form.Item
-          className="!mb-12"
-            name="upload"
+            className="!mb-12"
+            name="AvatarFile"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[{ validator: validateFile }]}
+            rules={[
+              {
+                required: true,
+                message: "لطفا حداقل یک فایل تصویر بارگذاری کنید",
+              },
+              {
+                validator: (_, fileList) => {
+                  if (!fileList || fileList.length === 0) {
+                    return Promise.reject(
+                      new Error("لطفا حداقل یک فایل تصویر بارگذاری کنید")
+                    );
+                  }
+                  if (fileList.length > MAX_IMAGES) {
+                    return Promise.reject(
+                      new Error(`حداکثر تعداد فایل مجاز ${MAX_IMAGES} عدد است`)
+                    );
+                  }
+                  for (const file of fileList) {
+                    const isImage = file.type.startsWith("image/");
+                    if (!isImage) {
+                      return Promise.reject(
+                        new Error("فقط فایل‌های تصویری مجاز هستند")
+                      );
+                    }
+                    const isLt2M = file.size / 1024 / 1024 < 2;
+                    if (!isLt2M) {
+                      return Promise.reject(
+                        new Error("حجم فایل باید کمتر از ۲ مگابایت باشد")
+                      );
+                    }
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
           >
             <>
-              <Dragger className=""
+              <Dragger
                 name="files"
                 multiple
                 beforeUpload={() => false}
@@ -526,7 +739,7 @@ const GeneralInfoFormWithDrawer = () => {
 
       <div
         dir="ltr"
-        className="fixed    bottom-0  w-[100%] md:w-[88.3%]  left-0   bg-white shadow-2xl p-4 flex justify-between items-center z-50"
+        className="fixed bottom-0 w-[100%] md:w-[88.3%] left-0 bg-white shadow-2xl p-4 flex justify-between items-center z-50"
       >
         <div className="flex gap-4">
           <Button
@@ -534,6 +747,7 @@ const GeneralInfoFormWithDrawer = () => {
             type="primary"
             htmlType="submit"
             form="my-form"
+            loading={isLoading}
           >
             ارسال
           </Button>
@@ -557,72 +771,6 @@ const GeneralInfoFormWithDrawer = () => {
           ریست فرم
         </Button>
       </div>
-
-      {/* دراور */}
-      <Drawer
-        title={
-          <div className="flex mt-4 mb-2 flex-row-reverse justify-between items-center w-full">
-            <button
-              type="button"
-              className="w-7 h-7 cursor-pointer flex items-center justify-center rounded-full bg-red-200 text-red-800 hover:bg-red-300 duration-300"
-              onClick={closeDrawer}
-            >
-              <CloseOutlined />
-            </button>
-            <span>راهنما</span>
-          </div>
-        }
-        width={700} // این خط عرض دراور را بزرگ‌تر می‌کند
-        placement="left"
-        onClose={closeDrawer}
-        open={isDrawerOpen}
-        closable={false}
-        className=""
-        headerStyle={{
-          padding: "0 16px",
-          display: "flex",
-          alignItems: "center",
-        }}
-        bodyStyle={{ padding: "16px" }}
-      >
-        <span
-          className="fa-stack"
-          style={{ fontSize: "4em", color: "#159c9c", width: "100%" }}
-        >
-          <div>
-            <i className="mt-2 fa-duotone fa-layer-group fa-stack-2x"></i>
-          </div>
-        </span>
-
-        <div className="text-[#159c9c] text-center mt-5 font-bold text-lg">
-          سمت کاربر
-        </div>
-        <br />
-
-        <div className="space-y-4 text-[18px] font-light ">
-          <p>
-            - منظور از سمت، موقعیت کاربر در چارت سازمانی مورد نظر است مانند
-            مدیرکل، مدیر عامل، کارشناس، معاون مالی و ....
-          </p>
-          <p>- سمت‌ها در بخش مدیریت درختواره قابل تعریف و ویرایش هستند</p>
-          <p>
-            - با تعیین سمت کاربر می‌توانید موقعیت کاربر در گراف و درخت سازمانی
-            را مشاهده کنید
-          </p>
-          <p>
-            - با تعیین سمت کاربر می‌توانید موقعیت کاربر در گراف و درخت سازمانی
-            را مشاهده کنید
-          </p>
-          <p>
-            - با ثبت سمت می‌توانید از ویژگی دسترسی به سامانه با استفاده از سمت
-            را استفاده کنید
-          </p>
-          <p>
-            - در قسمت مدیریت سمت‌ها نیز می‌توانید کاربر مورد نظر را به سمت
-            دلخواه خود متصل کنید
-          </p>
-        </div>
-      </Drawer>
     </div>
   );
 };
