@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
 import getUsers from "../../../service/userFilter";
 import {
@@ -17,7 +17,7 @@ interface ShowUserTabelProps {
 
 const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-
+const nav = useNavigate()
   // گرفتن مقدار اولیه از URL
   const initialSearch = searchParams.get("search") || "";
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
@@ -103,7 +103,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       icon: <EditOutlined />,
       title: "ویرایش",
       description: "ویرایش اطلاعات",
-      onClick: (item: any) => alert(`Edit clicked for ${item.id}`),
+      onClick: (item: any) =>nav(`/panel/users/edit/${item.id}`),
     },
     {
       icon: <DeleteOutlined />,

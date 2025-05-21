@@ -1,7 +1,11 @@
 import api from "../utils/api";
 
-function postUser(data) {
+ export function apiPostUser(data) {
   return api.post("/v1/User/", data).then(res => res.data);
 }
 
-export default postUser
+
+
+  export function apiUpdateUser(data) {
+  return api.put("/v1/User/", data).then(res => res.data);
+}

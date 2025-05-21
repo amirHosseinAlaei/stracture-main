@@ -85,8 +85,18 @@ const PanelRoutes = {
       
     },
 
+    
      {
-      path: "users/folan",
+      path: "users/add",
+      element: (
+        <SuspenseWrapper>
+          <GeneralInfoForm />
+        </SuspenseWrapper>
+        
+      ),
+    },
+     {
+      path: "users/edit/:id",
       element: (
         <SuspenseWrapper>
           <GeneralInfoForm />
