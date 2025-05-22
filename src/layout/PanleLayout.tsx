@@ -67,21 +67,23 @@ const PanelLayout: React.FC = () => {
             >
               <MenuOutlined className="text-lg" />
             </button>
+
             <div className="p-2 w-full justify-between items-center flex">
               <div>
-                <Breadcrumb
-                  items={[
-                    { title: "خانه" },
-                    { title: "لیست" },
-                    { title: "اپلیکیشن" },
-                  ]}
-                  style={{ margin: "16px 0" }}
-                />
+                <div  id="panel-action-breadcrumb" />
               </div>
+
               <div dir="ltr" id="panel-action-button" />
+              
             </div>
+
+
           </div>
+
+<div className="w-full h-px mt-2 bg-gray-300"></div>
+
           {/* محتوای اصلی */}
+
           <Content
             style={{
               background: "#fff",

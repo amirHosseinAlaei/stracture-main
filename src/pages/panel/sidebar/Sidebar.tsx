@@ -45,12 +45,7 @@ const panelItems = [
 ];
 
 // آیتم‌های اصلی سایدبار
-const items: MenuProps["items"] = [
-
-  ...panelItems,
- 
-
-];
+const items: MenuProps["items"] = [...panelItems];
 
 const SidebarContent = ({
   openKeys,
@@ -129,6 +124,8 @@ const SidebarContent = ({
             ? `${x.data.data.firstName} ${x.data.data.lastName}`
             : "نام کاربر"}
         </div>
+
+        <div className="w-full md:hidden h-px mt-2 bg-gray-300"></div>
       </div>
       {AccountButtons}
 

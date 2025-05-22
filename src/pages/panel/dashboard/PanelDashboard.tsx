@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import PortalButton from "../../../utils/portallButton";
-import { Button, Tooltip } from "antd";
+import { Breadcrumb, Button, Tooltip } from "antd";
+import PortalBreadcrumb from "../../../components/commoen/ProtalBreadcrumb";
 
 const center = 275,
   centerCircleSize = 80;
@@ -47,6 +47,7 @@ const items = [
     text: "تنظیمات سیستم",
   },
 ];
+
 const toRad = (deg) => (deg * Math.PI) / 180;
 
 export default function PanelDashboard() {
@@ -57,7 +58,7 @@ export default function PanelDashboard() {
 
   useEffect(() => {
     const animate = () => {
-      setRotation((r) => (r + 0.02) % 360);
+      setRotation((r) => (r + 0.03) % 360);
       reqRef.current = requestAnimationFrame(animate);
     };
     reqRef.current = requestAnimationFrame(animate);
@@ -65,8 +66,8 @@ export default function PanelDashboard() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] h-full gap-6 p-4">
-      <svg width="100%" viewBox="0 0 550 550" className="max-w-[550px]">
+    <div className="flex  flex-col items-center justify-center min-h-[500px] h-full gap-6 p-4">
+      <svg width="100%" viewBox="0 0 550 550" className="max-w-[500px] ">
         <circle
           cx={center}
           cy={center}
@@ -82,7 +83,7 @@ export default function PanelDashboard() {
           height={60}
           style={{ pointerEvents: "none" }}
         >
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full  h-full flex items-center justify-center">
             <i className="far fa-shield-alt text-[42px] text-black" />
           </div>
         </foreignObject>
@@ -95,6 +96,7 @@ export default function PanelDashboard() {
         >
           {hover !== null ? items[hover].text : ""}
         </text>
+        {/* Group for rotating items */}
         <g
           transform={`rotate(${rotation},${center},${center})`}
           style={{ cursor: "pointer" }}
@@ -112,6 +114,7 @@ export default function PanelDashboard() {
             const foX = ex - foSize / 2,
               foY = ey - foSize / 2;
             const isH = hover === i;
+
             return (
               <g
                 key={i}
@@ -140,7 +143,10 @@ export default function PanelDashboard() {
                   y={foY}
                   width={foSize}
                   height={foSize}
-                  style={{ pointerEvents: "none" }}
+                  style={{
+                    pointerEvents: "none",
+                    willChange: "transform",
+                  }}
                 >
                   <Tooltip title={item.text} placement="top">
                     <div
@@ -164,10 +170,15 @@ export default function PanelDashboard() {
           })}
         </g>
       </svg>
-      <div className="items-center text-lg -mt-10 text-center space-y-2 flex flex-col">
+
+      <div className="items-center text-cyan-900  text-lg -mt-16 text-center space-y-2 flex flex-col">
         <p>پنل مدیریت کاربران </p>
         <p>سامان</p>
-        <Button type="text">نسخه 2.1.1:040118</Button>
+        <Button  className="!bg-slate-200" type="text">نسخه 2.1.1:040118</Button>
+
+        <PortalBreadcrumb>
+          <Breadcrumb className="" items={[{ title: "خانه" }]} />
+        </PortalBreadcrumb>
       </div>
     </div>
   );

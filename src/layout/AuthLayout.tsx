@@ -7,6 +7,7 @@ function AuthLayout() {
         <div className="md:bg-white p-6 rounded-lg md:shadow-lg w-full max-w-md mx-4 md:mx-auto">
           <Outlet />
         </div>
+        
       </div>
     </>
   );
