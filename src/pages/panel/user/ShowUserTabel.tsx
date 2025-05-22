@@ -10,6 +10,8 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import PortalButton from "../../../utils/portallButton";
+import { Button } from "antd";
 
 interface ShowUserTabelProps {
   setButtonText?: (text: string) => void;
@@ -116,7 +118,13 @@ const nav = useNavigate()
 
   if (isError) return <div className="error-message">خطا: {error?.message}</div>;
 
-  return (
+return (
+  <>
+    <PortalButton>
+      <Button type="primary" onClick={() => navigate("/panel/new")}>
+        افزودن مورد جدید
+      </Button>
+    </PortalButton>
     <TabelContainer
       initialColumns={columns}
       data={data?.data?.items || []}
@@ -131,7 +139,9 @@ const nav = useNavigate()
       setPageSize={setPageSize}
       actionButtons={actionButtons}
     />
-  );
+  </>
+);
+
 };
 
 export default ShowUserTabel;

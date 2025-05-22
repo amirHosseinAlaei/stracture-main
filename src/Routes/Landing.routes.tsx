@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import LandingLayout from "../leyout/LandingLeyout";
+import LandingLayout from "../layout/LandingLayout";
 import Loading from "../components/commoen/Loading";
 
 const LandingContent = lazy(() => import("../pages/landing/LandingContent"));

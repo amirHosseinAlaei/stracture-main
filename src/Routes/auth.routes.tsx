@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import LoginLayout from "../leyout/AuthLayout";
+import LoginLayout from "../layout/AuthLayout";
 import Loading from "../components/commoen/Loading";
 const Login = lazy(() => import("../pages/authentication/Login"));
 const Suspenswrapper: React.FC<{ children: React.ReactNode }> = ({

@@ -8,28 +8,14 @@ const { Content, Sider } = Layout;
 
 interface PanelLayoutProps {}
 
-interface SidebarContentProps {
-  openKeys: string[];
-  setOpenKeys: (keys: string[]) => void;
-  selectedKeys: string[];
-  setSelectedKeys: (keys: string[]) => void;
-  handleProfile: () => void;
-  handleLogout: () => void;
-  isMobile?: boolean;
-  onClose?: () => void;
-}
-
 const PanelLayout: React.FC<PanelLayoutProps> = () => {
-  // تعریف state ها با تایپ‌های مشخص
   const [openKeys, setOpenKeys] = useState<string[]>(
     window.innerWidth >= 992 ? ["sub1"] : []
   );
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
-
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  // تعریف توابع با تایپ‌های مشخص
   const onOpen = (): void => {
     setIsDrawerOpen(true);
   };
@@ -47,10 +33,8 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
   };
 
   return (
-    <Layout
-    >
-      <Layout style={{
-      }}>
+    <Layout>
+      <Layout>
         <Sider
           width={200}
           breakpoint="lg"
@@ -86,18 +70,16 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Drawer>
 
-        <Layout   className="h-screen" style={{ padding: "0 24px 24px", height: '100%' }}>
-          <div className="flex justify-center gap-4  items-center">
+        <Layout className="h-screen" style={{ padding: "0 24px 24px", height: '100%' }}>
+          <div className="flex justify-center gap-4 items-center">
             <button
               onClick={onOpen}
-              className="!rounded-md hover:text-blue-00   duration-300 cursor-pointer  bg-white !p-2.5 md:!hidden"
+              className="!rounded-md hover:text-blue-00 duration-300 cursor-pointer bg-white !p-2.5 md:!hidden"
             >
               <MenuOutlined className="text-lg" />
             </button>
-            <div className=" p-2 w-full justify-between items-center  flex "> 
-
-
-              <div className=" ">
+            <div className="p-2 w-full justify-between items-center flex">
+              <div>
                 <Breadcrumb
                   items={[
                     { title: "خانه" },
@@ -108,26 +90,19 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
                 />
               </div>
 
-              <div dir="ltr" className="  ">
-                <Button type="primary" className="!px-12 text-white  !p-5">
-                  
-                  ثبت کاربر جدید
-                </Button>
+              <div dir="ltr" id="panel-action-button" />
 
-              </div>
+              
             </div>
           </div>
 
-{/*  */}
-          <Content 
-            className=""
+          <Content
             style={{
               background: "#fff",
               borderRadius: "8px",
             }}
           >
-            
-             < Outlet />
+            <Outlet />
           </Content>
         </Layout>
       </Layout>

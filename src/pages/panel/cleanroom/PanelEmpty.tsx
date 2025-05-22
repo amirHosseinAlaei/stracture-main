@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import PortalButton from "../../../utils/portallButton";
+import { Button } from "antd";
 // Center Round
 const center = 275;
 const centerCircleSize = 80;
@@ -66,6 +68,13 @@ function PanelEmpty() {
 
   return (
     <div className="flex items-center justify-center min-h-[500px] h-full">
+
+      <PortalButton>
+        <Button type="primary" onClick={() => navigate("/panel/new")}>
+          اasdفزودن مورد جدید
+        </Button>
+      </PortalButton>
+
       <svg width="550" height="550" viewBox="0 0 550 550">
         {/* center dound */}
         <circle

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import Loading from "../components/commoen/Loading";
-import ErrorLayout from "../leyout/ErorLeyout";
+import ErrorLayout from "../layout/ErorLayout";
 
 const Error404 = lazy(() => import("../pages/eror/Eror404"));
 const Suspenswrapper: React.FC<{ children: React.ReactNode }> = ({
@@ -18,7 +18,7 @@ const landingRoutes = {
       path: "/404",
       element: (
         <Suspenswrapper>
-            <Error404/>
+          <Error404 />
         </Suspenswrapper>
       ),
     },

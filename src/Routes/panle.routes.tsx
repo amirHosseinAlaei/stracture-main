@@ -1,14 +1,10 @@
 import { lazy, Suspense } from "react";
-import PanelLayout from "../leyout/PanleLeyout"; // اصلاح نام
+import PanelLayout from "../layout/PanleLayout"; // اصلاح نام
 import Loading from "../components/commoen/Loading"; // اصلاح نام
 import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUser";
 
-const PanelEmpty = lazy(() =>
-  import("../pages/panel/cleanroom/PanelEmpty")
-); // اصلاح نام
-const ShowUserTabel = lazy(() =>
-  import("../pages/panel/user/ShowUserTabel")
-); // اصلاح نام
+const PanelEmpty = lazy(() => import("../pages/panel/cleanroom/PanelEmpty")); // اصلاح نام
+const ShowUserTabel = lazy(() => import("../pages/panel/user/ShowUserTabel")); // اصلاح نام
 
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -17,7 +13,6 @@ const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const PanelRoutes = {
-
   path: "/panel", // اصلاح نام
   element: <PanelLayout />,
   children: [
@@ -37,7 +32,6 @@ const PanelRoutes = {
         <SuspenseWrapper>
           <ShowUserTabel />
         </SuspenseWrapper>
-        
       ),
     },
     {
@@ -71,37 +65,30 @@ const PanelRoutes = {
           <ShowUserTabel />
         </SuspenseWrapper>
       ),
-
-
     },
-      {
+    {
       path: "settings",
       element: (
         <SuspenseWrapper>
           <ShowUserTabel />
         </SuspenseWrapper>
       ),
-
-      
     },
 
-    
-     {
+    {
       path: "users/add",
       element: (
         <SuspenseWrapper>
           <GeneralInfoForm />
         </SuspenseWrapper>
-        
       ),
     },
-     {
+    {
       path: "users/edit/:id",
       element: (
         <SuspenseWrapper>
           <GeneralInfoForm />
         </SuspenseWrapper>
-        
       ),
     },
   ],
