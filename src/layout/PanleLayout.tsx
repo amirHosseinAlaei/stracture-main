@@ -1,40 +1,28 @@
 import React, { useState } from "react";
-import { Layout, Breadcrumb, Drawer, Button } from "antd";
+import { Layout, Breadcrumb, Drawer } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import SidebarContent from "../pages/panel/sidebar/Sidebar";
 import { Outlet } from "react-router-dom";
 
 const { Content, Sider } = Layout;
 
-interface PanelLayoutProps {}
-
-const PanelLayout: React.FC<PanelLayoutProps> = () => {
+const PanelLayout: React.FC = () => {
   const [openKeys, setOpenKeys] = useState<string[]>(
     window.innerWidth >= 992 ? ["sub1"] : []
   );
-
   const [selectedKeys, setSelectedKeys] = useState<string[]>(["1"]);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  const onOpen = (): void => {
-    setIsDrawerOpen(true);
-  };
+  const onOpen = (): void => setIsDrawerOpen(true);
+  const onClose = (): void => setIsDrawerOpen(false);
 
-  const onClose = (): void => {
-    setIsDrawerOpen(false);
-  };
-
-  const handleProfile = (): void => {
-    alert("صفحه حساب کاربری");
-  };
-
-  const handleLogout = (): void => {
-    alert("خروج از حساب");
-  };
+  const handleProfile = (): void => alert("صفحه حساب کاربری");
+  const handleLogout = (): void => alert("خروج از حساب");
 
   return (
-    <Layout>
+    <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>
       <Layout>
+        {/* سایدبار دسکتاپ */}
         <Sider
           width={200}
           breakpoint="lg"
@@ -50,7 +38,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Sider>
 
-        {/* منوی موبایل (Drawer) */}
+        {/* منوی موبایل */}
         <Drawer
           title="منو"
           placement="right"
@@ -70,8 +58,9 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
           />
         </Drawer>
 
-        <Layout className="h-screen" style={{ padding: "0 24px 24px", height: '100%' }}>
-          <div className="flex justify-center gap-4 items-center">
+        <Layout style={{ padding: "0 24px 24px", background: "transparent" }}>
+          {/* هدر/بردکرامب و دکمه منو */}
+          <div className="flex justify-center gap-4 items-center mt-4">
             <button
               onClick={onOpen}
               className="!rounded-md hover:text-blue-00 duration-300 cursor-pointer bg-white !p-2.5 md:!hidden"
@@ -89,17 +78,17 @@ const PanelLayout: React.FC<PanelLayoutProps> = () => {
                   style={{ margin: "16px 0" }}
                 />
               </div>
-
               <div dir="ltr" id="panel-action-button" />
-
-              
             </div>
           </div>
-
+          {/* محتوای اصلی */}
           <Content
             style={{
               background: "#fff",
               borderRadius: "8px",
+              marginTop: "16px",
+              minHeight: "calc(100vh - 110px)", // ارتفاع داینامیک براساس هدر و پدینگ
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             }}
           >
             <Outlet />

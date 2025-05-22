@@ -3,7 +3,7 @@ import PanelLayout from "../layout/PanleLayout"; // اصلاح نام
 import Loading from "../components/commoen/Loading"; // اصلاح نام
 import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUser";
 
-const PanelEmpty = lazy(() => import("../pages/panel/cleanroom/PanelEmpty")); // اصلاح نام
+const PanelEmpty = lazy(() => import("../pages/panel/cleanroom/PanelDashboard")); // اصلاح نام
 const ShowUserTabel = lazy(() => import("../pages/panel/user/ShowUserTabel")); // اصلاح نام
 
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({

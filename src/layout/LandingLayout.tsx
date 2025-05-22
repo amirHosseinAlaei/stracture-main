@@ -51,8 +51,6 @@ const LandingLayout: React.FC = () => {
         {/* Content */}
         <Content className="flex-1 flex flex-col px-4 p-4">
           <Outlet />
-          <div>1</div>
-          <div>2</div>
         </Content>
       </Layout>
       {/* Footer */}
