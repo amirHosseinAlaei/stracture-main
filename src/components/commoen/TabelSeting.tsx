@@ -30,17 +30,12 @@ const TableSettingsModal = ({
 }: Props) => {
   const handleOk = () => {
     setOpen(false);
-    toast.success( "تنظیمات جدول با موفقیت ذخیره شد. ✅");
+    toast.success("تنظیمات جدول با موفقیت ذخیره شد. ✅");
   };
 
   const handleCancel = () => {
     setOpen(false);
   };
-
-  // هندلرها برای هر گزینه
-  const handleDragClick = () => setDragEnabled(!dragEnabled);
-  const handleStickyClick = () => setStickyActionEnabled(!stickyActionEnabled);
-  const handleSortClick = () => setSortLastNameEnabled(!sortLastNameEnabled);
 
   return (
     <Modal
@@ -65,17 +60,16 @@ const TableSettingsModal = ({
         {/* گزینه ۱ */}
         <div
           className={`flex items-start gap-2 cursor-pointer rounded-lg px-2 py-1 transition hover:bg-blue-50`}
-          onClick={handleDragClick}
+          onClick={() => setDragEnabled(!dragEnabled)}
         >
           <DragOutlined className="mt-1 text-blue-400" />
+          <Checkbox
+            checked={dragEnabled}
+            onChange={(e) => setDragEnabled(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
+          />
           <div>
-            <Checkbox
-              checked={dragEnabled}
-              onChange={(e) => setDragEnabled(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              فعال‌سازی جابجایی ستون‌ها (درگ اند دراپ)
-            </Checkbox>
+            <div className="font-medium">فعال‌سازی جابجایی ستون‌ها (درگ اند دراپ)</div>
             <div className="text-xs text-gray-500 mt-1">
               امکان چینش دلخواه ستون‌ها با کشیدن و رها کردن
             </div>
@@ -85,17 +79,16 @@ const TableSettingsModal = ({
         {/* گزینه ۲ */}
         <div
           className={`flex items-start gap-2 cursor-pointer rounded-lg px-2 py-1 transition hover:bg-green-50`}
-          onClick={handleStickyClick}
+          onClick={() => setStickyActionEnabled(!stickyActionEnabled)}
         >
           <PushpinOutlined className="mt-1 text-green-400" />
+          <Checkbox
+            checked={stickyActionEnabled}
+            onChange={(e) => setStickyActionEnabled(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
+          />
           <div>
-            <Checkbox
-              checked={stickyActionEnabled}
-              onChange={(e) => setStickyActionEnabled(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              فریز بودن ستون عملیات (sticky)
-            </Checkbox>
+            <div className="font-medium">فریز بودن ستون عملیات (sticky)</div>
             <div className="text-xs text-gray-500 mt-1">
               ستون عملیات همیشه قابل مشاهده باشد
             </div>
@@ -105,17 +98,16 @@ const TableSettingsModal = ({
         {/* گزینه ۳ */}
         <div
           className={`flex items-start gap-2 cursor-pointer rounded-lg px-2 py-1 transition hover:bg-purple-50`}
-          onClick={handleSortClick}
+          onClick={() => setSortLastNameEnabled(!sortLastNameEnabled)}
         >
           <SortAscendingOutlined className="mt-1 text-purple-400" />
+          <Checkbox
+            checked={sortLastNameEnabled}
+            onChange={(e) => setSortLastNameEnabled(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
+          />
           <div>
-            <Checkbox
-              checked={sortLastNameEnabled}
-              onChange={(e) => setSortLastNameEnabled(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              فعال‌سازی مرتب‌سازی نام خانوادگی
-            </Checkbox>
+            <div className="font-medium">فعال‌سازی مرتب‌سازی نام خانوادگی</div>
             <div className="text-xs text-gray-500 mt-1">
               امکان مرتب‌سازی سطرها براساس نام خانوادگی
             </div>

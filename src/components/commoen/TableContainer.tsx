@@ -133,7 +133,7 @@ function TabelContainer({
         <Button 
           icon={<SettingOutlined />}
           onClick={() => setSettingsOpen(true)}
-          className="flex w-26 !h-full !p-2 hover:bg-blue-700 transition-all duration-200 "
+          className="flex w-22 !h-full !p-2  hover:bg-blue-700 transition-all duration-200 "
 type="primary"
         >
           تنظیمات 
