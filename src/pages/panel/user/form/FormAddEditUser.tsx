@@ -8,7 +8,6 @@ import {
   Radio,
   Upload,
   Typography,
-  message,
   TimePicker,
 } from "antd";
 import {
@@ -30,7 +29,9 @@ import { useParams } from "react-router-dom";
 import {
   onlyNumbers,
   validateNationalCode,
+  validateImageFiles,
 } from "../../../../utils/formHellper";
+import toast from "react-hot-toast";
 
 const { Dragger } = Upload;
 const { Title } = Typography;
@@ -44,10 +45,106 @@ const SectionTitle = ({ title }) => (
   </div>
 );
 
-const MAX_IMAGE_SIZE_MB = 2;
+const SignatureUpload = ({ form }) => {
+  const [fileList, setFileList] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+
+  const handleChange = (info) => {
+    let files = info.fileList.slice(-1);
+    const previews = [];
+    const validFiles = files.filter((file) => {
+      if (file.size / 1024 / 1024 > 2) return false;
+      if (!file.url && !file.preview) {
+        file.preview = URL.createObjectURL(file.originFileObj || file);
+      }
+      previews.push({ uid: file.uid, url: file.url || file.preview });
+      return true;
+    });
+    setPreviewUrls(previews);
+    setFileList(validFiles);
+    form.setFieldsValue({ SignatureFile: validFiles });
+  };
+
+  const handleRemoveImage = (uid) => {
+    const newFileList = fileList.filter((file) => file.uid !== uid);
+    setFileList(newFileList);
+    setPreviewUrls(previewUrls.filter((img) => img.uid !== uid));
+    form.setFieldsValue({ SignatureFile: newFileList });
+  };
+
+  return (
+    <>
+      <Dragger
+        name="signature"
+        multiple={false}
+        beforeUpload={() => false}
+        accept="image/*"
+        showUploadList={false}
+        fileList={fileList}
+        onChange={handleChange}
+        disabled={fileList.length >= 1}
+        style={{
+          padding: 24,
+          borderRadius: 12,
+          borderColor: "#1890ff",
+        }}
+      >
+        <p className="ant-upload-drag-icon">
+          <InboxOutlined style={{ color: "#1890ff" }} />
+        </p>
+        <p className="ant-upload-text text-lg font-semibold">
+          برای بارگذاری امضا کلیک کنید یا فایل را بکشید و رها کنید
+        </p>
+        <p className="ant-upload-hint mt-3 text-gray-600">
+          فقط یک فایل تصویری، حداکثر ۲ مگابایت
+        </p>
+      </Dragger>
+      {previewUrls.length > 0 && (
+        <div className="flex gap-3 mt-4 flex-wrap">
+          {previewUrls.map((img) => (
+            <div
+              key={img.uid}
+              style={{
+                position: "relative",
+                width: 90,
+                height: 90,
+                borderRadius: 8,
+                border: "1px solid #eee",
+                overflow: "hidden",
+              }}
+            >
+              <img
+                src={img.url}
+                alt="preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <CloseCircleOutlined
+                onClick={() => handleRemoveImage(img.uid)}
+                style={{
+                  position: "absolute",
+                  top: 2,
+                  right: 2,
+                  color: "red",
+                  fontSize: 20,
+                  cursor: "pointer",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                }}
+                title="حذف تصویر"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
 
 const GeneralInfoFormWithDrawer = () => {
-  // React Query
   const { id } = useParams();
   const { data } = useQuery({
     queryKey: ["users", id],
@@ -56,95 +153,50 @@ const GeneralInfoFormWithDrawer = () => {
     enabled: !!id,
   });
 
-  // Form and states
   const [form] = Form.useForm();
   const [birthDate, setBirthDate] = useState(null);
   const [birthDateError, setBirthDateError] = useState(null);
+
+  // Avatar states
+  const [avatarFileList, setAvatarFileList] = useState([]);
+  const [avatarPreviewUrls, setAvatarPreviewUrls] = useState([]);
+
   const [isAccessLimited, setIsAccessLimited] = useState(false);
 
-  // --- Image Upload States ---
-  const [avatarFile, setAvatarFile] = useState([]);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-
-  const [signatureFile, setSignatureFile] = useState([]);
-  const [signaturePreview, setSignaturePreview] = useState(null);
-
-  const [otherFile, setOtherFile] = useState([]);
-  const [otherPreview, setOtherPreview] = useState(null);
-
-  // --- Load data if edit mode ---
   useEffect(() => {
     if (data) {
       form.setFieldsValue(data);
-      if (data.birthDate) {
-        setBirthDate(
-          new DateObject(data.birthDate).convert(persian, persian_fa)
-        );
-      }
-      // اگر فایل‌ها از سرور برگردند، اینجا می‌توانید پیش‌نمایش‌شان را ست کنید
-      // setAvatarPreview(data.avatarUrl)
-      // setSignaturePreview(data.signatureUrl)
-      // setOtherPreview(data.otherDocUrl)
+      // برای نمایش عکس قبلی اگر نیاز بود اینجا ست کن
     }
   }, [data, form]);
 
-  // --- API mutations ---
+  const onBirthDateChange = (date) => {
+    setBirthDate(date);
+    if (birthDateError) setBirthDateError(null);
+  };
+
   const createUser = useMutation({
     mutationFn: apiPostUser,
     onSuccess: () => {
-      message.success("اطلاعات با موفقیت ارسال شد");
+      toast.success("اطلاعات با موفقیت ارسال شد");
       onReset();
     },
-    onError: () => {
-      message.error("ارسال اطلاعات با خطا مواجه شد");
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "ارسال اطلاعات با خطا مواجه شد");
     },
   });
 
   const updateUser = useMutation({
     mutationFn: apiUpdateUser,
     onSuccess: () => {
-      message.success("اطلاعات با موفقیت ارسال شد");
+      toast.success("اطلاعات با موفقیت ارسال شد");
       onReset();
     },
-    onError: () => {
-      message.error("ارسال اطلاعات با خطا مواجه شد");
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "ارسال اطلاعات با خطا مواجه شد");
     },
   });
 
-  // --- Image Upload Handlers ---
-  const handleImageChange = (info, setFile, setPreview) => {
-    let file = info.fileList.slice(-1)[0]; // فقط آخرین فایل
-    if (file) {
-      // حجم و نوع
-      if (!file.type.startsWith("image/")) {
-        message.error("فقط فایل تصویری مجاز است");
-        return;
-      }
-      if ((file.size || 0) / 1024 / 1024 > MAX_IMAGE_SIZE_MB) {
-        message.error("حجم فایل باید کمتر از ۲ مگابایت باشد");
-        return;
-      }
-      // پیش‌نمایش
-      if (!file.url && !file.preview) {
-        file.preview = URL.createObjectURL(file.originFileObj || file);
-      }
-      setFile([file]);
-      setPreview(file.url || file.preview);
-      form.setFieldsValue({ [file.name]: [file] });
-    } else {
-      setFile([]);
-      setPreview(null);
-      form.setFieldsValue({ [file.name]: [] });
-    }
-  };
-
-  const handleRemoveImage = (setFile, setPreview, name) => {
-    setFile([]);
-    setPreview(null);
-    form.setFieldsValue({ [name]: [] });
-  };
-
-  // --- Form Submit ---
   const onFinish = (values) => {
     if (!birthDate) {
       setBirthDateError("لطفا تاریخ تولد را انتخاب کنید");
@@ -152,37 +204,24 @@ const GeneralInfoFormWithDrawer = () => {
     }
     setBirthDateError(null);
 
-    // اعتبارسنجی تصاویر
-    if (avatarFile.length === 0)
-      return message.error("لطفا عکس کاربر را بارگذاری کنید");
-    if (signatureFile.length === 0)
-      return message.error("لطفا امضای کاربر را بارگذاری کنید");
-    if (otherFile.length === 0)
-      return message.error("لطفا تصویر مدرک دیگر را بارگذاری کنید");
-
-    // تبدیل تاریخ
     const gregorian = birthDate.convert("gregorian");
     values.birthDate = gregorian.toDate().toISOString();
     if (data && id) values.id = id;
 
-    // آماده‌سازی فرم دیتا
     const formData = new FormData();
     Object.keys(values).forEach((key) => {
-      formData.append(key, values[key]);
+      if (key === "AvatarFile" && Array.isArray(avatarFileList)) {
+        avatarFileList.forEach((file) => {
+          formData.append("AvatarFile", file.originFileObj || file);
+        });
+      } else if (key === "SignatureFile" && Array.isArray(values.SignatureFile)) {
+        values.SignatureFile.forEach((file) => {
+          formData.append("SignatureFile", file.originFileObj || file);
+        });
+      } else {
+        formData.append(key, values[key]);
+      }
     });
-    // اضافه کردن فایل‌ها
-    if (avatarFile[0])
-      formData.append(
-        "AvatarFile",
-        avatarFile[0].originFileObj || avatarFile[0]
-      );
-    if (signatureFile[0])
-      formData.append(
-        "SignatureFile",
-        signatureFile[0].originFileObj || signatureFile[0]
-      );
-    if (otherFile[0])
-      formData.append("OtherFile", otherFile[0].originFileObj || otherFile[0]);
 
     if (data && id) {
       updateUser.mutate(formData);
@@ -191,23 +230,41 @@ const GeneralInfoFormWithDrawer = () => {
     }
   };
 
-  // --- Reset ---
   const onReset = () => {
     setBirthDate(null);
     setBirthDateError(null);
     form.resetFields();
-    setAvatarFile([]);
-    setAvatarPreview(null);
-    setSignatureFile([]);
-    setSignaturePreview(null);
-    setOtherFile([]);
-    setOtherPreview(null);
+    setAvatarFileList([]);
+    setAvatarPreviewUrls([]);
+  };
+
+  // Avatar handlers
+  const handleAvatarChange = (info) => {
+    let files = info.fileList.slice(-1);
+    const previews = [];
+    const validFiles = files.filter((file) => {
+      if (file.size / 1024 / 1024 > 2) return false;
+      if (!file.url && !file.preview) {
+        file.preview = URL.createObjectURL(file.originFileObj || file);
+      }
+      previews.push({ uid: file.uid, url: file.url || file.preview });
+      return true;
+    });
+    setAvatarPreviewUrls(previews);
+    setAvatarFileList(validFiles);
+    form.setFieldsValue({ AvatarFile: validFiles });
+  };
+
+  const handleRemoveAvatar = (uid) => {
+    const newFileList = avatarFileList.filter((file) => file.uid !== uid);
+    setAvatarFileList(newFileList);
+    setAvatarPreviewUrls(avatarPreviewUrls.filter((img) => img.uid !== uid));
+    form.setFieldsValue({ AvatarFile: newFileList });
   };
 
   return (
     <div>
       <div className="min-h-screen p-4 flex flex-col relative">
-        <h4 className="mt-4 mb-4 text-md font-bold">اطلاعات عمومی</h4>
         <Form
           id="my-form"
           form={form}
@@ -216,9 +273,9 @@ const GeneralInfoFormWithDrawer = () => {
           name="nationalCode"
           className="flex-grow"
         >
-          {/* اطلاعات فردی */}
           <Row gutter={16}>
-            <Col span={6}>
+            {/* nationalCode */}
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="کد ملی"
                 name="nationalCode"
@@ -248,7 +305,9 @@ const GeneralInfoFormWithDrawer = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            {/* firstName */}
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="نام"
                 name="firstName"
@@ -257,7 +316,9 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            {/* lastName */}
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="نام خانوادگی"
                 name="lastName"
@@ -268,7 +329,8 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="نام پدر"
                 name="fatherName"
@@ -279,7 +341,8 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="موبایل"
                 name="mobile"
@@ -303,7 +366,8 @@ const GeneralInfoFormWithDrawer = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="ایمیل"
                 name="email"
@@ -315,7 +379,8 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 name="birthDate"
                 label="تاریخ تولد"
@@ -327,7 +392,7 @@ const GeneralInfoFormWithDrawer = () => {
                   calendar={persian}
                   locale={persian_fa}
                   value={birthDate}
-                  onChange={setBirthDate}
+                  onChange={onBirthDateChange}
                   inputClass="border border-gray-300 rounded-md px-3 py-1 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
                   calendarPosition="bottom-right"
                   placeholder="انتخاب تاریخ تولد"
@@ -336,7 +401,8 @@ const GeneralInfoFormWithDrawer = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={6}>
+
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="جنسیت"
                 name="gender"
@@ -352,9 +418,9 @@ const GeneralInfoFormWithDrawer = () => {
             </Col>
           </Row>
           <SectionTitle title="اطلاعات سامانه" />
-          {/* اطلاعات سامانه */}
+
           <Row gutter={16}>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="نوع کاربر"
                 name="type"
@@ -368,7 +434,7 @@ const GeneralInfoFormWithDrawer = () => {
                 </Radio.Group>
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="وضعیت"
                 name="status"
@@ -382,7 +448,7 @@ const GeneralInfoFormWithDrawer = () => {
                 </Radio.Group>
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="ورود دو مرحله‌ای"
                 name="twoFactorEnabled"
@@ -399,7 +465,7 @@ const GeneralInfoFormWithDrawer = () => {
                 </Radio.Group>
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="دسترسی به وب‌سرویس"
                 name="smsWebServiceAccess"
@@ -417,8 +483,9 @@ const GeneralInfoFormWithDrawer = () => {
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={16}>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
                 label="نام کاربری"
                 name="userName"
@@ -431,7 +498,7 @@ const GeneralInfoFormWithDrawer = () => {
               </Form.Item>
             </Col>
             {!data && !id && (
-              <Col span={6}>
+              <Col xs={24} sm={12} md={8} lg={6}>
                 <Form.Item
                   label="رمز عبور"
                   name="password"
@@ -449,45 +516,45 @@ const GeneralInfoFormWithDrawer = () => {
                 </Form.Item>
               </Col>
             )}
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item label="استعلام ثبت حوال" name="sabtHaval">
                 <Input disabled placeholder="مقدار استعلام ثبت حوال" />
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item label="استعلام شاهکار" name="shahkar">
                 <Input disabled placeholder="مقدار استعلام شاهکار" />
               </Form.Item>
             </Col>
           </Row>
-          {/* محدودیت زمانی */}
-          <div className="flex items-center gap-x-4 w-full flex-row">
+
+          <div className="flex items-center gap-x-4 w-full flex-row flex-wrap">
             <div className="flex justify-center text-center mt-6 items-center">
               <Button
                 type={isAccessLimited ? "primary" : "default"}
                 onClick={() => setIsAccessLimited((prev) => !prev)}
-                className={`mb-4 flex items-center rounded-2xl w-auto ${
-                  isAccessLimited ? "flex-row" : "flex-row-reverse"
+                className={`mb-4 flex items-center !rounded-2xl !shadow-lg w-auto ${
+                  isAccessLimited ? "flex-row " : "flex-row-reverse"
                 }`}
               >
                 <span
                   className={`inline-block w-7 h-7 rounded-full bg-white border border-gray-300 ${
-                    isAccessLimited ? "mr-0 ml-2" : "ml-0 mr-2"
+                    isAccessLimited ? "  -mr-4" : "-ml-4"
                   }`}
                 />
                 <span className="p-2 px-4">
                   {isAccessLimited
                     ? "مجاز ورود در ساعات معین"
-                    : "محدودیت زمانی غیرفعال است"}
+                    : "محدودیت زمان غیرفعال است"}
                 </span>
               </Button>
             </div>
 
-            <div className="w-1/2">
+            <div className="w-full md:w-1/2">
               <Row gutter={16}>
                 {isAccessLimited && (
                   <>
-                    <Col span={12}>
+                    <Col xs={24} md={12}>
                       <Form.Item
                         label="ساعت مجاز آغاز ورود"
                         name="allowedLoginStartTime"
@@ -505,7 +572,7 @@ const GeneralInfoFormWithDrawer = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col span={12}>
+                    <Col xs={24} md={12}>
                       <Form.Item
                         label="ساعت مجاز پایان ورود"
                         name="allowedLoginEndTime"
@@ -528,37 +595,39 @@ const GeneralInfoFormWithDrawer = () => {
               </Row>
             </div>
           </div>
+
           <Driverguide />
+
           <SectionTitle title="بارگذاری تصویر" />
-          <div className=" flex flex-col gap-5 md:flex-row    ">
-            <div className="w-full">
-              {/* --- Avatar Upload --- */}
+
+          <Row className=" mb-8 md:mb-auto" gutter={16}>
+            {/* آپلود عکس کاربر */}
+            <Col xs={24} md={12}>
               <Form.Item
-                className=" w-full"
                 label="عکس کاربر"
-                name="AvatarFile"
-                valuePropName="fileList"
+                name="avatarBase64"
+                valuePropName="avatarBase64`"
+                getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
                 rules={[
                   {
-                    validator: () =>
-                      avatarFile.length === 0
-                        ? Promise.reject("لطفا عکس کاربر را بارگذاری کنید")
-                        : Promise.resolve(),
+                    validator: (_, fileList) => {
+                      if (!fileList || fileList.length === 0) return Promise.resolve();
+                      const error = validateImageFiles(fileList, 1);
+                      return error ? Promise.reject(new Error(error)) : Promise.resolve();
+                    },
                   },
                 ]}
               >
                 <>
                   <Dragger
-                    name="AvatarFile"
+                    name="avatar"
                     multiple={false}
                     beforeUpload={() => false}
                     accept="image/*"
                     showUploadList={false}
-                    fileList={avatarFile}
-                    onChange={(info) =>
-                      handleImageChange(info, setAvatarFile, setAvatarPreview)
-                    }
-                    disabled={avatarFile.length >= 1}
+                    fileList={avatarFileList}
+                    onChange={handleAvatarChange}
+                    disabled={avatarFileList.length >= 1}
                     style={{
                       padding: 24,
                       borderRadius: 12,
@@ -569,161 +638,81 @@ const GeneralInfoFormWithDrawer = () => {
                       <InboxOutlined style={{ color: "#1890ff" }} />
                     </p>
                     <p className="ant-upload-text text-lg font-semibold">
-                      فقط یک عکس کاربر بارگزاری کنید
+                      برای بارگزاری عکس کلیک کنید یا فایل را بکشید و رها کنید
                     </p>
                     <p className="ant-upload-hint mt-3 text-gray-600">
-                      فقط فایل تصویری، حداکثر حجم ۲ مگابایت
+                      فقط یک عکس، فرمت تصویری و حداکثر ۲ مگابایت
                     </p>
                   </Dragger>
-
-                  {avatarPreview && (
+                  {avatarPreviewUrls.length > 0 && (
                     <div className="flex gap-3 mt-4 flex-wrap">
-                      <div
-                        style={{
-                          position: "relative",
-                          width: 90,
-                          height: 90,
-                          borderRadius: 8,
-                          border: "1px solid #eee",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <img
-                          src={avatarPreview}
-                          alt="avatar"
+                      {avatarPreviewUrls.map((img) => (
+                        <div
+                          key={img.uid}
                           style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
+                            position: "relative",
+                            width: 90,
+                            height: 90,
+                            borderRadius: 8,
+                            border: "1px solid #eee",
+                            overflow: "hidden",
                           }}
-                        />
-                        <CloseCircleOutlined
-                          onClick={() =>
-                            handleRemoveImage(
-                              setAvatarFile,
-                              setAvatarPreview,
-                              "AvatarFile"
-                            )
-                          }
-                          style={{
-                            position: "absolute",
-                            top: 2,
-                            right: 2,
-                            color: "red",
-                            fontSize: 20,
-                            cursor: "pointer",
-                            backgroundColor: "white",
-                            borderRadius: "50%",
-                          }}
-                          title="حذف تصویر"
-                        />
-                      </div>
+                        >
+                          <img
+                            src={img.url}
+                            alt="preview"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <CloseCircleOutlined
+                            onClick={() => handleRemoveAvatar(img.uid)}
+                            style={{
+                              position: "absolute",
+                              top: 2,
+                              right: 2,
+                              color: "red",
+                              fontSize: 20,
+                              cursor: "pointer",
+                              backgroundColor: "white",
+                              borderRadius: "50%",
+                            }}
+                            title="حذف تصویر"
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </>
               </Form.Item>
-            </div>
-            <div className="w-full">
+            </Col>
+
+            {/* آپلود امضا */}
+            <Col xs={24} md={12}>
               <Form.Item
-                className=" "
-                label="امضای کاربر"
+                label="امضا"
                 name="SignatureFile"
                 valuePropName="fileList"
+                getValueFromEvent={e => (Array.isArray(e) ? e : e && e.fileList)}
                 rules={[
                   {
-                    validator: () =>
-                      signatureFile.length === 0
-                        ? Promise.reject("لطفا امضای کاربر را بارگذاری کنید")
-                        : Promise.resolve(),
+                    validator: (_, fileList) => {
+                      if (!fileList || fileList.length === 0) return Promise.resolve();
+                      const error = validateImageFiles(fileList, 1);
+                      return error ? Promise.reject(new Error(error)) : Promise.resolve();
+                    },
                   },
                 ]}
               >
-                <>
-                  <Dragger
-                    name="SignatureFile"
-                    multiple={false}
-                    beforeUpload={() => false}
-                    accept="image/*"
-                    showUploadList={false}
-                    fileList={signatureFile}
-                    onChange={(info) =>
-                      handleImageChange(
-                        info,
-                        setSignatureFile,
-                        setSignaturePreview
-                      )
-                    }
-                    disabled={signatureFile.length >= 1}
-                    style={{
-                      padding: 24,
-                      borderRadius: 12,
-                      borderColor: "#1890ff",
-                    }}
-                  >
-                    <p className="ant-upload-drag-icon">
-                      <InboxOutlined style={{ color: "#1890ff" }} />
-                    </p>
-                    <p className="ant-upload-text text-lg font-semibold">
-                      فقط یک تصویر امضای کاربر بارگزاری کنید
-                    </p>
-                    <p className="ant-upload-hint mt-3 text-gray-600">
-                      فقط فایل تصویری، حداکثر حجم ۲ مگابایت
-                    </p>
-                  </Dragger>
-
-                  {signaturePreview && (
-                    <div className="flex gap-3 mt-4 flex-wrap">
-                      <div
-                        style={{
-                          position: "relative",
-                          width: 90,
-                          height: 90,
-                          borderRadius: 8,
-                          border: "1px solid #eee",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <img
-                          src={signaturePreview}
-                          alt="signature"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <CloseCircleOutlined
-                          onClick={() =>
-                            handleRemoveImage(
-                              setSignatureFile,
-                              setSignaturePreview,
-                              "SignatureFile"
-                            )
-                          }
-                          style={{
-                            position: "absolute",
-                            top: 2,
-                            right: 2,
-                            color: "red",
-                            fontSize: 20,
-                            cursor: "pointer",
-                            backgroundColor: "white",
-                            borderRadius: "50%",
-                          }}
-                          title="حذف تصویر"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </>
+                <SignatureUpload form={form} />
               </Form.Item>
-            </div>
-          </div>
-          {/* --- Signature Upload --- */}
+            </Col>
+          </Row>
         </Form>
       </div>
 
-      {/* دکمه‌های پایین صفحه */}
       <div
         dir="ltr"
         className="fixed bottom-0 w-full md:w-[88.3%] left-0 bg-white shadow-2xl p-4 flex justify-between items-center z-50"
