@@ -11,6 +11,8 @@ interface UserTableTheadProps {
   sortKey: string | null;
   sortOrder: "asc" | "desc" | null;
   onSortChange: (key: string) => void;
+  dragEnabled?: boolean;
+  sortLastNameEnabled?: boolean;
 }
 
 function UserTableThead({
@@ -19,6 +21,8 @@ function UserTableThead({
   sortKey,
   sortOrder,
   onSortChange,
+  dragEnabled = true,
+  sortLastNameEnabled = true,
 }: UserTableTheadProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -58,23 +62,25 @@ function UserTableThead({
     dragItem.current = null;
   };
 
-  // ستون‌هایی که نمی‌خوای درگ بشن:
+  // ستون‌هایی که نباید درگ شوند
   const nonDraggableKeys = ["rowNumber", "actions"];
 
   return (
     <thead className="bg-[#e3e5e9] sticky top-0 z-10">
       <tr>
-        <th className="p-4 text-right select-none" key="rowNumber">
+        {/* ستون ردیف */}
+        <th
+          className="p-4 text-right select-none break-words bg-[#e3e5e9] sticky right-0 z-50"
+          key="rowNumber"
+        >
           ردیف
         </th>
+        {/* سایر ستون‌ها */}
         {columns.map((col, index) => {
           const isDragging = index === draggedIndex;
           const isDragOver = index === dragOverIndex;
-
-          // فقط ستون lastName قابلیت مرتب سازی دارد:
-          const isSortable = col.key === "lastName";
-
-          const draggable = !nonDraggableKeys.includes(col.key);
+          const isSortable = sortLastNameEnabled && col.key === "lastName";
+          const draggable = dragEnabled && !nonDraggableKeys.includes(col.key);
 
           return (
             <th
@@ -82,14 +88,14 @@ function UserTableThead({
               draggable={draggable}
               onDragStart={() => draggable && handleDragStart(index)}
               onDragEnter={() => draggable && handleDragEnter(index)}
-              onDragOver={(e) => draggable && handleDragOver(e)}
+              onDragOver={draggable ? handleDragOver : undefined}
               onDrop={() => draggable && handleDrop()}
               onDragEnd={() => draggable && handleDragEnd()}
               onClick={() => {
                 if (isSortable) onSortChange(col.key);
               }}
               className={`
-                p-4 select-none transition-all duration-300 ease-in-out
+                p-4 select-none transition-all duration-300 ease-in-out break-words bg-[#e3e5e9]
                 ${
                   isSortable
                     ? "cursor-pointer hover:bg-gray-300"
@@ -116,7 +122,7 @@ function UserTableThead({
               }}
             >
               {col.label}
-              {/* آیکون مرتب سازی */}
+              {/* آیکون مرتب‌سازی */}
               {isSortable && (
                 <i
                   className={`mr-1 fa-solid ${
@@ -130,7 +136,17 @@ function UserTableThead({
             </th>
           );
         })}
-        <th className="p-4 select-none" key="actions">
+        {/* ستون عملیات */}
+        <th
+          className="p-4 select-none break-words bg-[#e3e5e9] sticky left-0 z-50"
+          key="actions"
+          style={{
+            minWidth: "100px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
           عملیات
         </th>
       </tr>

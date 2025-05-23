@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
-import getUsers from "../../../service/userFilter";
+import getUsers from "../../../service/getUserTabel";
 import {
   SafetyCertificateOutlined,
   LockOutlined,
@@ -126,9 +126,9 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
     <>
       <PortalButton>
         <Button
-          className="!p-2 !bg-blue-700 !h-10 flex items-center !gap-3"
+          className="!p-2 !bg-blue-700 !h-10 flex items-center gap-3"
           type="primary"
-          onClick={() => nav("/panel/new")}
+          onClick={() => nav("/panel/users/add")}
         >
           افزودن کاربر جدید
           <i className="fas fa-user-plus text-white"></i>{" "}

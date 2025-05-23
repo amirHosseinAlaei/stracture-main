@@ -22,17 +22,13 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import Driverguide from "../../../../utils/Driverguide";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiPostUser, apiUpdateUser } from "../../../../service/postUser";
+import getUserById, { apiPostUser, apiUpdateUser } from "../../../../service/userService";
 import { useParams } from "react-router-dom";
-import getUserById from "../../../../service/getUSerid";
 
 const { Dragger } = Upload;
-
 const { Title } = Typography;
-
-const onlyNumbers = (value) => value.replace(/\D/g, "");
-
 const MAX_IMAGES = 5;
+const onlyNumbers = (value) => value.replace(/\D/g, "");
 
 const SectionTitle = ({ title }) => (
   <div className="flex items-center my-5 gap-4">
@@ -43,13 +39,8 @@ const SectionTitle = ({ title }) => (
   </div>
 );
 
-// const SESSION_STORAGE_KEY = "generalInfoFormData";
-// const SESSION_STORAGE_BIRTHDATE_KEY = "generalInfoFormBirthDate";
-// const SESSION_STORAGE_FILELIST_KEY = "generalInfoFormFileList";
-
 const GeneralInfoFormWithDrawer = () => {
   const { id } = useParams();
-
   const { data } = useQuery({
     queryKey: ["users", id],
     queryFn: () => getUserById(id),
@@ -61,68 +52,18 @@ const GeneralInfoFormWithDrawer = () => {
   const [birthDate, setBirthDate] = useState(null);
   const [birthDateError, setBirthDateError] = useState(null);
   const [fileList, setFileList] = useState([]);
-  const [errorFiles, setErrorFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
-
   const [isAccessLimited, setIsAccessLimited] = useState(false);
 
-  // useEffect(() => {
-  //   const savedForm = sessionStorage.getItem(SESSION_STORAGE_KEY);
-  //   if (savedForm) {
-  //     try {
-  //       const parsed = JSON.parse(savedForm);
-  //       form.setFieldsValue(parsed);
-  //     } catch {}
-  //   }
-  //   const savedBirthDate = sessionStorage.getItem(
-  //     SESSION_STORAGE_BIRTHDATE_KEY
-  //   );
-  //   if (savedBirthDate) {
-  //     try {
-  //       const dateObj = new DateObject({
-  //         calendar: persian,
-  //         locale: persian_fa,
-  //         date: JSON.parse(savedBirthDate),
-  //       });
-  //       setBirthDate(dateObj);
-  //     } catch {}
-  //   }
-  //   const savedFiles = sessionStorage.getItem(SESSION_STORAGE_FILELIST_KEY);
-  //   if (savedFiles) {
-  //     try {
-  //       const files = JSON.parse(savedFiles);
-  //       const previews = files.map((file) => {
-  //         return { uid: file.uid, url: file.url };
-  //       });
-  //       setFileList(files);
-  //       setPreviewUrls(previews);
-  //       form.setFieldsValue({ AvatarFile: files });
-  //     } catch {}
-  //   }
-  // }, [form]);
-
-  // const onValuesChange = (_, allValues) => {
-  //   sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(allValues));
-  // };
-
   useEffect(() => {
-    form.setFieldsValue(data);
-  }, [id, data]);
+    if (data) form.setFieldsValue(data);
+  }, [data, form]);
 
   const onBirthDateChange = (date) => {
     setBirthDate(date);
     if (birthDateError) setBirthDateError(null);
-    // if (date) {
-    //   sessionStorage.setItem(
-    //     SESSION_STORAGE_BIRTHDATE_KEY,
-    //     JSON.stringify(date.toJSON())
-    //   );
-    // } else {
-    //   sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    // }
   };
 
-  // useMutation برای ارسال فرم
   const createUser = useMutation({
     mutationFn: apiPostUser,
     onSuccess: () => {
@@ -145,19 +86,17 @@ const GeneralInfoFormWithDrawer = () => {
     },
   });
 
-  const onFinish = async (values) => {
+  const onFinish = (values) => {
     if (!birthDate) {
       setBirthDateError("لطفا تاریخ تولد را انتخاب کنید");
       return;
-    } else {
-      setBirthDateError(null);
     }
+    setBirthDateError(null);
 
     const gregorian = birthDate.convert("gregorian");
     values.birthDate = gregorian.toDate().toISOString();
-    if (data && id) {
-      values.id = id;
-    }
+    if (data && id) values.id = id;
+
     const formData = new FormData();
     Object.keys(values).forEach((key) => {
       if (key === "AvatarFile" && Array.isArray(fileList)) {
@@ -174,12 +113,6 @@ const GeneralInfoFormWithDrawer = () => {
     } else {
       createUser.mutate(formData);
     }
-    // try {
-    //   await mutateAsync(formData);
-    //   sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    //   sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    //   sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
-    // } catch {}
   };
 
   const onReset = () => {
@@ -187,75 +120,33 @@ const GeneralInfoFormWithDrawer = () => {
     setBirthDateError(null);
     form.resetFields();
     setFileList([]);
-    setErrorFiles([]);
     setPreviewUrls([]);
-    // sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    // sessionStorage.removeItem(SESSION_STORAGE_BIRTHDATE_KEY);
-    // sessionStorage.removeItem(SESSION_STORAGE_FILELIST_KEY);
   };
 
   const handleChange = (info) => {
     let files = info.fileList.slice(-MAX_IMAGES);
-
-    const overSized = [];
     const previews = [];
 
-    files.forEach((file) => {
-      if (file.size / 1024 / 1024 > 2) {
-        overSized.push(file.name);
-      } else {
-        if (!file.url && !file.preview) {
-          file.preview = URL.createObjectURL(file.originFileObj || file);
-        }
-        previews.push({ uid: file.uid, url: file.url || file.preview });
+    const validFiles = files.filter((file) => {
+      if (file.size / 1024 / 1024 > 2) return false;
+      if (!file.url && !file.preview) {
+        file.preview = URL.createObjectURL(file.originFileObj || file);
       }
+      previews.push({ uid: file.uid, url: file.url || file.preview });
+      return true;
     });
 
-    setErrorFiles(overSized);
     setPreviewUrls(previews);
-
-    const validFiles = files.filter((file) => file.size / 1024 / 1024 <= 2);
     setFileList(validFiles);
     form.setFieldsValue({ AvatarFile: validFiles });
-
-    const filesToSave = validFiles.map((file) => ({
-      uid: file.uid,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: file.url || file.preview,
-    }));
-    // sessionStorage.setItem(
-    //   SESSION_STORAGE_FILELIST_KEY,
-    //   JSON.stringify(filesToSave)
-    // );
   };
 
   const handleRemoveImage = (uid) => {
     const newFileList = fileList.filter((file) => file.uid !== uid);
     setFileList(newFileList);
-
-    const newPreviewUrls = previewUrls.filter((img) => img.uid !== uid);
-    setPreviewUrls(newPreviewUrls);
-
+    setPreviewUrls(previewUrls.filter((img) => img.uid !== uid));
     form.setFieldsValue({ AvatarFile: newFileList });
-
-    const filesToSave = newFileList.map((file) => ({
-      uid: file.uid,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: file.url || file.preview,
-    }));
-    // sessionStorage.setItem(
-    //   SESSION_STORAGE_FILELIST_KEY,
-    //   JSON.stringify(filesToSave)
-    // );
   };
-
-  if (data && id) {
-    form.setFieldsValue(data);
-  }
 
   return (
     <div>
@@ -267,7 +158,6 @@ const GeneralInfoFormWithDrawer = () => {
           onFinish={onFinish}
           name="nationalCode"
           className="flex-grow"
-          // onValuesChange={onValuesChange}
         >
           <Row gutter={16}>
             {/* nationalCode */}
@@ -276,14 +166,8 @@ const GeneralInfoFormWithDrawer = () => {
                 label="کد ملی"
                 name="nationalCode"
                 rules={[
-                  {
-                    required: true,
-                    message: "لطفا کد ملی را وارد کنید",
-                  },
-                  {
-                    pattern: /^\d{10}$/,
-                    message: "کد ملی باید ۱۰ رقم عدد باشد",
-                  },
+                  { required: true, message: "لطفا کد ملی را وارد کنید" },
+                  { pattern: /^\d{10}$/, message: "کد ملی باید ۱۰ رقم عدد باشد" },
                   {
                     validator: (_, value) => {
                       if (!value) return Promise.resolve();
@@ -327,7 +211,7 @@ const GeneralInfoFormWithDrawer = () => {
                 <Input allowClear />
               </Form.Item>
             </Col>
-            
+
             {/* lastName */}
             <Col span={6}>
               <Form.Item
@@ -358,10 +242,7 @@ const GeneralInfoFormWithDrawer = () => {
                 label="موبایل"
                 name="mobile"
                 rules={[
-                  {
-                    required: true,
-                    message: "لطفا شماره موبایل را وارد کنید",
-                  },
+                  { required: true, message: "لطفا شماره موبایل را وارد کنید" },
                   {
                     pattern: /^09\d{9}$/,
                     message: "شماره موبایل باید ۱۱ رقم و با 09 شروع شود",
@@ -425,15 +306,14 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="1">مرد</Radio>
-                  <Radio value="0">زن</Radio>
+                  <Radio value={1}>مرد</Radio>
+                  <Radio value={0}>زن</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
           </Row>
           <SectionTitle title="اطلاعات سامانه" />
 
-          {/* ردیف Radioها */}
           <Row gutter={16}>
             <Col span={6}>
               <Form.Item
@@ -444,8 +324,8 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="0">شهروند</Radio>
-                  <Radio value="1">سازمانی</Radio>
+                  <Radio value={0}>شهروند</Radio>
+                  <Radio value={1}>سازمانی</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
@@ -458,15 +338,15 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="1">فعال</Radio>
-                  <Radio value="0">غیرفعال</Radio>
+                  <Radio value={1}>فعال</Radio>
+                  <Radio value={0}>غیرفعال</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
                 label="ورود دو مرحله‌ای"
-                name="twoStepAuth"
+                name="twoFactorEnabled"
                 rules={[
                   {
                     required: true,
@@ -475,15 +355,15 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="1">فعال</Radio>
-                  <Radio value="0">غیرفعال</Radio>
+                  <Radio value={true}>فعال</Radio>
+                  <Radio value={false}>غیرفعال</Radio>
                 </Radio.Group>
-              </Form.Item>
+              </Form.Item>  
             </Col>
             <Col span={6}>
               <Form.Item
                 label="دسترسی به وب‌سرویس"
-                name="webServiceAccess"
+                name="smsWebServiceAccess"
                 rules={[
                   {
                     required: true,
@@ -492,19 +372,18 @@ const GeneralInfoFormWithDrawer = () => {
                 ]}
               >
                 <Radio.Group>
-                  <Radio value="1">دارد</Radio>
-                  <Radio value="2">ندارد</Radio>
+                  <Radio value={true}>دارد</Radio>
+                  <Radio value={false}>ندارد</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
           </Row>
 
-          {/* ردیف Inputها */}
           <Row gutter={16}>
             <Col span={6}>
               <Form.Item
                 label="نام کاربری"
-                name="username"
+                name="userName"
                 rules={[
                   { required: true, message: "نام کاربری الزامی است" },
                   { min: 3, message: "نام کاربری باید حداقل ۳ کاراکتر باشد" },
@@ -544,136 +423,80 @@ const GeneralInfoFormWithDrawer = () => {
             </Col>
           </Row>
 
-          <div className="flex !items-center  flex-row gap-x-4 w-full">
-            {/* دکمه */}
-            <div className=" !flex  !justify-center text-center mt-6 !items-center">
-              <Button
-                type={isAccessLimited ? "primary" : "default"}
-                onClick={() => setIsAccessLimited((prev) => !prev)}
-                className={`mb-4 flex items-center !p-0  !rounded-2xl w-auto ${
-                  isAccessLimited ? "flex-row" : "flex-row-reverse"
-                }`}
-              >
-                <span
-                  className={`inline-block w-7 h-7 rounded-full bg-white border border-gray-300
-      ${isAccessLimited ? "mr-0 ml-2" : "ml-0 mr-2"}`}
-                />
-                <span className="p-2 px-4">
-                  {isAccessLimited
-                    ? "مجاز ورود در ساعات معین"
-                    : "تعیین نوع محدودیت ورود"}
-                </span>
-              </Button>
-            </div>
+        <div className="flex items-center gap-x-4 w-full flex-row">
+  <div className="flex justify-center text-center mt-6 items-center">
+    <Button
+      type={isAccessLimited ? "primary" : "default"}
+      onClick={() => setIsAccessLimited((prev) => !prev)}
+      className={`mb-4 flex items-center rounded-2xl w-auto ${
+        isAccessLimited ? "flex-row" : "flex-row-reverse"
+      }`}
+    >
+      <span
+        className={`inline-block w-7 h-7 rounded-full bg-white border border-gray-300 ${
+          isAccessLimited ? "mr-0 ml-2" : "ml-0 mr-2"
+        }`}
+      />
+      <span className="p-2 px-4">
+        {isAccessLimited
+          ? "مجاز ورود در ساعات معین"
+          : "محدودیت زمانی غیرفعال است"}
+      </span>
+    </Button>
+  </div>
 
-            {/* فرم */}
-            <div className="w-1/2">
-              <Row gutter={16}>
-                {isAccessLimited ? (
-                  <>
-                    <Col span={12}>
-                      <Form.Item
-                        label="ساعت مجاز آغاز ورود"
-                        name="allowedStartTime"
-                        rules={[
-                          {
-                            required: true,
-                            message: "لطفا ساعت مجاز آغاز ورود را انتخاب کنید",
-                          },
-                        ]}
-                      >
-                        <TimePicker
-                          format="HH:mm"
-                          placeholder="مثلاً 08:00"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        label="ساعت مجاز پایان ورود"
-                        name="allowedEndTime"
-                        rules={[
-                          {
-                            required: true,
-                            message: "لطفا ساعت مجاز پایان ورود را انتخاب کنید",
-                          },
-                        ]}
-                      >
-                        <TimePicker
-                          format="HH:mm"
-                          placeholder="مثلاً 17:00"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </>
-                ) : (
-                  <>
-                    <Col span={12}>
-                      <Form.Item
-                        label="ساعت غیرمجاز آغاز ورود"
-                        name="forbiddenStartTime"
-                        rules={[
-                          {
-                            required: true,
-                            message:
-                              "لطفا ساعت غیرمجاز آغاز ورود را انتخاب کنید",
-                          },
-                        ]}
-                      >
-                        <TimePicker
-                          format="HH:mm"
-                          placeholder="مثلاً 23:00"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        label="ساعت غیرمجاز پایان ورود"
-                        name="forbiddenEndTime"
-                        rules={[
-                          {
-                            required: true,
-                            message:
-                              "لطفا ساعت غیرمجاز پایان ورود را انتخاب کنید",
-                          },
-                        ]}
-                      >
-                        <TimePicker
-                          format="HH:mm"
-                          placeholder="مثلاً 06:00"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </>
-                )}
-              </Row>
-            </div>
-          </div>
-
-          <div className="mt-2 mb-6">
-            <p>IP های مجاز ورود (مثال:192.168.1.166)</p>
-
-            <Input
-              className="!w-24 !mt-3"
-              placeholder="مثال: 192.168.1.166"
-              onKeyPress={(e) => {
-                if (!/[0-9.]/.test(e.key)) {
-                  e.preventDefault();
-                }
-              }}
-            />
-          </div>
+  <div className="w-1/2">
+    <Row gutter={16}>
+      {isAccessLimited && (
+        <>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت مجاز آغاز ورود"
+              name="allowedLoginStartTime"
+              rules={[
+                {
+                  required: true,
+                  message: "لطفا ساعت مجاز آغاز ورود را انتخاب کنید",
+                },
+              ]}
+            >
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 08:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="ساعت مجاز پایان ورود"
+              name="allowedLoginEndTime"
+              rules={[
+                {
+                  required: true,
+                  message: "لطفا ساعت مجاز پایان ورود را انتخاب کنید",
+                },
+              ]}
+            >
+              <TimePicker
+                format="HH:mm"
+                placeholder="مثلاً 17:00"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+        </>
+      )}
+    </Row>
+  </div>
+</div>
 
           <Driverguide />
 
           <SectionTitle title="بارگذاری تصویر" />
 
           <Form.Item
-            className="!mb-12"
+            className="mb-12"
             name="AvatarFile"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
@@ -735,19 +558,13 @@ const GeneralInfoFormWithDrawer = () => {
                 <p className="ant-upload-text text-lg font-semibold">
                   برای بارگزاری عکس کلیک کنید یا فایل‌ها را بکشید و رها کنید
                 </p>
-                <p className="ant-upload-hint !mt-3 text-gray-600">
+                <p className="ant-upload-hint mt-3 text-gray-600">
                   فقط فایل‌های تصویری مجاز هستند، حداکثر حجم هر فایل ۲ مگابایت
-                  <div className="!mt-4 text-center font-bold text-blue-700">
+                  <div className="mt-4 text-center font-bold text-blue-700">
                     {fileList.length}/{MAX_IMAGES} عکس انتخاب شده
                   </div>
                 </p>
               </Dragger>
-
-              {errorFiles.length > 0 && (
-                <div className="mt-2 text-red-600 font-bold">
-                  این فایل‌ بیش از ۲ مگابایت هست و بارگذاری نشدند:
-                </div>
-              )}
 
               {previewUrls.length > 0 && (
                 <div className="flex gap-3 mt-4 flex-wrap">
@@ -790,13 +607,6 @@ const GeneralInfoFormWithDrawer = () => {
                   ))}
                 </div>
               )}
-
-              <style>{`
-                @keyframes fadeInScale {
-                  from { opacity: 0; transform: scale(0.95);}
-                  to { opacity: 1; transform: scale(1);}
-                }
-              `}</style>
             </>
           </Form.Item>
         </Form>
@@ -804,11 +614,11 @@ const GeneralInfoFormWithDrawer = () => {
 
       <div
         dir="ltr"
-        className="fixed bottom-0 w-[100%] md:w-[88.3%] left-0 bg-white shadow-2xl p-4 flex justify-between items-center z-50"
+        className="fixed bottom-0 w-full md:w-[88.3%] left-0 bg-white shadow-2xl p-4 flex justify-between items-center z-50"
       >
         <div className="flex gap-4">
           <Button
-            className="!px-8 !py-4 !bg-blue-800 hover:!bg-blue-900 min-w-[220px]"
+            className="px-8 py-4 bg-blue-800 hover:bg-blue-900 min-w-[220px]"
             type="primary"
             htmlType="submit"
             form="my-form"
@@ -821,14 +631,14 @@ const GeneralInfoFormWithDrawer = () => {
             icon={<ArrowLeftOutlined />}
             onClick={() => window.history.back()}
             type="text"
-            className="!px-8  !hidden  md:!flex !py-4 !bg-gray-200 hover:!bg-gray-300 min-w-[90px]"
+            className="px-8 hidden md:flex py-4 bg-gray-200 hover:bg-gray-300 min-w-[90px]"
           >
             بازگشت
           </Button>
         </div>
 
         <Button
-          className="!px-8 !border !border-slate-300 !py-4 !bg-slate-100 hover:!bg-slate-300 min-w-[90px]"
+          className="px-8 border border-slate-300 py-4 bg-slate-100 hover:bg-slate-300 min-w-[90px]"
           onClick={onReset}
           icon={<UndoOutlined />}
           type="text"

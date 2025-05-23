@@ -1,9 +1,11 @@
 import { lazy, Suspense } from "react";
-import PanelLayout from "../layout/PanleLayout"; // اصلاح نام
 import Loading from "../components/commoen/Loading"; // اصلاح نام
 import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUser";
+import PanelLayout from "../layout/PanlLayout";
 
-const PanelEmpty = lazy(() => import("../pages/panel/dashboard/PanelDashboard")); // اصلاح نام
+const PanelDashboard = lazy(
+  () => import("../pages/panel/dashboard/PanelDashboard")
+); 
 const ShowUserTabel = lazy(() => import("../pages/panel/user/ShowUserTabel")); // اصلاح نام
 
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
@@ -13,19 +15,17 @@ const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const PanelRoutes = {
-  path: "/panel", // اصلاح نام
+  path: "/panel",
   element: <PanelLayout />,
   children: [
-    // مسیر پیش‌فرض برای نمایش PanelEmpty
     {
       path: "",
       element: (
         <SuspenseWrapper>
-          <PanelEmpty />
+          <PanelDashboard />
         </SuspenseWrapper>
       ),
     },
-    // سایر مسیرها برای نمایش ShowUserTabel
     {
       path: "users",
       element: (

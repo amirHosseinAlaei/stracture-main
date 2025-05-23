@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import UserTableThead from "./TableHead";
 import UserTableTbody from "./TableBody";
+import { SettingOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import TableSettingsModal from "./TabelSeting";
 
 const PAGE_SIZES = [5, 10, 20, 30, 40, 50];
 
@@ -36,8 +39,13 @@ function TabelContainer({
   setPageSize,
   actionButtons = [],
 }: TabelContainerProps) {
-  const [columns, setColumns] = useState(initialColumns);
+  // تنظیمات جدول
+  const [dragEnabled, setDragEnabled] = useState(false);
+  const [stickyActionEnabled, setStickyActionEnabled] = useState(false);
+  const [sortLastNameEnabled, setSortLastNameEnabled] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const [columns, setColumns] = useState(initialColumns);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
@@ -45,16 +53,13 @@ function TabelContainer({
 
   const sortedData = React.useMemo(() => {
     if (!sortKey || !sortOrder) return data;
-
     const sorted = [...data].sort((a, b) => {
       const aVal = a[sortKey]?.toString().toLowerCase() || "";
       const bVal = b[sortKey]?.toString().toLowerCase() || "";
-
       if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
       if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
-
     return sorted;
   }, [data, sortKey, sortOrder]);
 
@@ -75,11 +80,9 @@ function TabelContainer({
 
   const handleSortChange = (key: string) => {
     if (sortKey === key) {
-      // اگر روی همان ستون کلیک شد، مرتب‌سازی خاموش کن
       setSortKey(null);
       setSortOrder(null);
     } else {
-      // مرتب‌سازی صعودی بشه
       setSortKey(key);
       setSortOrder("asc");
     }
@@ -88,8 +91,12 @@ function TabelContainer({
 
   return (
     <div className="px-5 py-4">
+     
+
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 sticky top-0 bg-white z-50 px-2 py-3 gap-3">
+        
         <div className="flex gap-2 items-center w-full md:w-auto">
+          
           <label htmlFor="search" className="font-medium text-gray-700">
             جستجو:
           </label>
@@ -121,6 +128,27 @@ function TabelContainer({
               جستجو
             </button>
           </div>
+          
+           <div className="flex items-center gap-2 ">
+        <Button 
+          icon={<SettingOutlined />}
+          onClick={() => setSettingsOpen(true)}
+          className="flex w-26 !h-full !p-2 hover:bg-blue-700 transition-all duration-200 "
+type="primary"
+        >
+          تنظیمات 
+        </Button>
+        <TableSettingsModal
+          open={settingsOpen}
+          setOpen={setSettingsOpen}
+          dragEnabled={dragEnabled}
+          setDragEnabled={setDragEnabled}
+          stickyActionEnabled={stickyActionEnabled}
+          setStickyActionEnabled={setStickyActionEnabled}
+          sortLastNameEnabled={sortLastNameEnabled}
+          setSortLastNameEnabled={setSortLastNameEnabled}
+        />
+      </div>
         </div>
         <div className="text-gray-500 text-sm md:text-base">
           تعداد کل : {totalCount}
@@ -135,7 +163,8 @@ function TabelContainer({
             sortKey={sortKey}
             sortOrder={sortOrder}
             onSortChange={handleSortChange}
-            className="sticky top-16 bg-white z-40"
+            dragEnabled={dragEnabled}
+            sortLastNameEnabled={sortLastNameEnabled}
           />
           <UserTableTbody
             items={sortedData}
@@ -143,6 +172,7 @@ function TabelContainer({
             page={page}
             pageSize={pageSize}
             actionButtons={actionButtons}
+            stickyActionEnabled={stickyActionEnabled}
           />
         </table>
       </div>

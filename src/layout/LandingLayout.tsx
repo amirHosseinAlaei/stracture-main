@@ -1,5 +1,6 @@
 //*Note => لندینگ پیج شامل 3 بخش هدر کانتنت و قوتر هست
 //تکمیلی :  1  فوتر تاریخ روز رو نمایش میده   2 - بخش هدر ما شامل 2 قسمت لوگو و نمایش  نام کاربر هست و خوش امد گویی  3 - قسمت کانتن نمایش سامانه های موجود
+
 import { Layout, Button } from "antd";
 import { Outlet } from "react-router-dom";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -16,22 +17,23 @@ const LandingLayout: React.FC = () => {
   const today = new Date();
   const persianFormattedDate = formatPersianDate(today);
   // Show-user-login
-  const fullName = currentUserQuery.isLoading
+  const user = currentUserQuery.data?.data;
+  const userDisplayName = currentUserQuery.isLoading
     ? "در حال بارگذاری..."
     : currentUserQuery.isError
     ? "خطا در دریافت"
-    : currentUserQuery.data?.data
-    ? `${currentUserQuery.data.data.firstName} ${currentUserQuery.data.data.lastName}`
+    : user
+    ? `${user.firstName} ${user.lastName}`
     : "کاربر ناشناس";
 
   // welcome-user-Alert
   useEffect(() => {
     const hasWelcomed = sessionStorage.getItem("hasWelcomed");
     if (currentUserQuery.data?.data && !hasWelcomed) {
-      toast.success(`خوش آمدید، ${fullName}`);
+      toast.success(`خوش آمدید، ${userDisplayName}`);
       sessionStorage.setItem("hasWelcomed", "true");
     }
-  }, [fullName, currentUserQuery.data?.data]);
+  }, [userDisplayName, currentUserQuery.data?.data]);
 
   // error-toast
   useEffect(() => {
@@ -43,17 +45,17 @@ const LandingLayout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen" style={{ direction: "rtl" }}>
       <Layout className="flex-1 flex flex-col">
-        {/* Header */}
+        {/*------ -Header- -----  */}
         <Header className="!bg-white shadow-lg flex items-center justify-between px-8">
           <div className="text-black font-bold text-[22px]">لوگوی سایت</div>
-          <Button className="items-center to-current">{fullName}</Button>
+          <Button className="items-center to-current">{userDisplayName}</Button>
         </Header>
-        {/* Content */}
+        {/*------ -Content- -----  */}
         <Content className="flex-1 flex flex-col px-4 p-4">
           <Outlet />
         </Content>
       </Layout>
-      {/* Footer */}
+      {/*------ -Layout- -----  */}
       <Footer className="!shadow-lg !bg-[#0101011a] text-center text-base !text-blue-600 font-bold tracking-wide">
         <div className="flex items-center justify-center gap-2">
           <CalendarOutlined className="text-xl" />

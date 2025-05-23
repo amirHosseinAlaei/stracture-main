@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import getUsers from "../service/userFilter";
+import getUsers from "../service/getUserTabel";
 
 export const UserTable = () => {
   const pageIndex = 1;
@@ -8,7 +8,8 @@ export const UserTable = () => {
 
   return useQuery({
     queryKey: ["getUsers", pageIndex, pageSize, search],
-    queryFn: () => getUsers({ PageIndex: pageIndex, PageSize: pageSize, Search: search }),
+    queryFn: () =>
+      getUsers({ PageIndex: pageIndex, PageSize: pageSize, Search: search }),
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
