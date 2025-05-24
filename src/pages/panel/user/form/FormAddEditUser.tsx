@@ -9,6 +9,7 @@ import {
   Upload,
   Typography,
   TimePicker,
+  Breadcrumb,
 } from "antd";
 import {
   InboxOutlined,
@@ -25,13 +26,15 @@ import getUserById, {
   apiPostUser,
   apiUpdateUser,
 } from "../../../../service/userService";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   onlyNumbers,
   validateNationalCode,
   validateImageFiles,
 } from "../../../../utils/formHellper";
 import toast from "react-hot-toast";
+import PortalBreadcrumb from "../../../../components/commoen/ProtalBreadcrumb";
+import AllowedIPInput from "./IpButton";
 
 const { Dragger } = Upload;
 const { Title } = Typography;
@@ -89,6 +92,7 @@ const SignatureUpload = ({ form }) => {
           borderColor: "#1890ff",
         }}
       >
+        
         <p className="ant-upload-drag-icon">
           <InboxOutlined style={{ color: "#1890ff" }} />
         </p>
@@ -156,6 +160,7 @@ const GeneralInfoFormWithDrawer = () => {
   const [form] = Form.useForm();
   const [birthDate, setBirthDate] = useState(null);
   const [birthDateError, setBirthDateError] = useState(null);
+  const nav = useNavigate();
 
   // Avatar states
   const [avatarFileList, setAvatarFileList] = useState([]);
@@ -264,7 +269,9 @@ const GeneralInfoFormWithDrawer = () => {
 
   return (
     <div>
+      
       <div className="min-h-screen p-4 flex flex-col relative">
+        <p className="mt-1 mb-4 text-[15px]">اطلاعات عمومی</p>
         <Form
           id="my-form"
           form={form}
@@ -276,34 +283,37 @@ const GeneralInfoFormWithDrawer = () => {
           <Row gutter={16}>
             {/* nationalCode */}
             <Col xs={24} sm={12} md={8} lg={6}>
-              <Form.Item
-                label="کد ملی"
-                name="nationalCode"
-                rules={[
-                  { required: true, message: "لطفا کد ملی را وارد کنید" },
-                  {
-                    pattern: /^\d{10}$/,
-                    message: "کد ملی باید ۱۰ رقم عدد باشد",
-                  },
-                  {
-                    validator: (_, value) =>
-                      !value || validateNationalCode(value)
-                        ? Promise.resolve()
-                        : Promise.reject("کد ملی وارد شده معتبر نیست"),
-                  },
-                ]}
-              >
-                <Input
-                  maxLength={10}
-                  allowClear
-                  onChange={(e) => {
-                    const onlyNum = onlyNumbers(e.target.value);
-                    if (onlyNum !== e.target.value) {
-                      form.setFieldsValue({ nationalCode: onlyNum });
-                    }
-                  }}
-                />
-              </Form.Item>
+          
+          <Form.Item
+  label="کد ملی"
+  name="nationalCode"
+  rules={[
+    { required: true, message: "لطفا کد ملی را وارد کنید" },
+    {
+      pattern: /^\d{10}$/,
+      message: "کد ملی باید ۱۰ رقم عدد باشد",
+    },
+    {
+      validator: (_, value) =>
+        !value || validateNationalCode(value)
+          ? Promise.resolve()
+          : Promise.reject("کد ملی وارد شده معتبر نیست"),
+    },
+  ]}
+>
+  <Input
+    maxLength={10}
+    allowClear
+    disabled={!!id}  
+    onChange={(e) => {
+      const onlyNum = onlyNumbers(e.target.value);
+      if (onlyNum !== e.target.value) {
+        form.setFieldsValue({ nationalCode: onlyNum });
+      }
+    }}
+  />
+</Form.Item>
+
             </Col>
 
             {/* firstName */}
@@ -382,7 +392,7 @@ const GeneralInfoFormWithDrawer = () => {
 
             <Col xs={24} sm={12} md={8} lg={6}>
               <Form.Item
-                name="birthDate"
+                name="birthDateT"
                 label="تاریخ تولد"
                 required
                 validateStatus={birthDateError ? "error" : ""}
@@ -595,12 +605,16 @@ const GeneralInfoFormWithDrawer = () => {
               </Row>
             </div>
           </div>
+            <div className=" items-end  bg-blue-900  flex justify-end mt-2">
+            <AllowedIPInput/>
+
+            </div>
 
           <Driverguide />
 
           <SectionTitle title="بارگذاری تصویر" />
 
-          <Row className=" mb-8 md:mb-auto" gutter={16}>
+          <Row className=" mb-8 m" gutter={16}>
             {/* آپلود عکس کاربر */}
             <Col xs={24} md={12}>
               <Form.Item
@@ -747,6 +761,25 @@ const GeneralInfoFormWithDrawer = () => {
           ریست فرم
         </Button>
       </div>
+      <PortalBreadcrumb>
+        <Breadcrumb>
+
+   <Breadcrumb.Item
+            onClick={() => nav(-2)}
+            className="cursor-pointer hover:bg-slate-200 p-1 rounded-lg duration-300 "
+          >
+            خانه
+          </Breadcrumb.Item>
+          <Breadcrumb.Item 
+            onClick={() => nav(-1)}
+          className="cursor-pointer"
+          >کاربران</Breadcrumb.Item>
+          <Breadcrumb.Item>اطلاعات کاربران</Breadcrumb.Item>
+
+        </Breadcrumb>
+
+
+      </PortalBreadcrumb>
     </div>
   );
 };
