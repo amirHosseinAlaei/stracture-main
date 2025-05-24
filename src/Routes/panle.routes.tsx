@@ -1,12 +1,12 @@
 import { lazy, Suspense } from "react";
 import Loading from "../components/commoen/Loading"; // اصلاح نام
-import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUserContiner";
 import PanelLayout from "../layout/PanlLayout";
+import GeneralInfoFormWithDrawer from "../pages/panel/user/form/FormContainer";
 
 const PanelDashboard = lazy(
   () => import("../pages/panel/dashboard/PanelDashboard")
 ); 
-const ShowUserTabel = lazy(() => import("../pages/panel/user/ShowUserTabel")); // اصلاح نام
+const ShowUserTabel = lazy(() => import("../pages/panel/user/Tables/ShowUserTabel")); // اصلاح نام
 
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -79,7 +79,7 @@ const PanelRoutes = {
       path: "users/add",
       element: (
         <SuspenseWrapper>
-          <GeneralInfoForm />
+          <GeneralInfoFormWithDrawer />
         </SuspenseWrapper>
       ),
     },
@@ -87,7 +87,7 @@ const PanelRoutes = {
       path: "users/edit/:id",
       element: (
         <SuspenseWrapper>
-          <GeneralInfoForm />
+          <GeneralInfoFormWithDrawer />
         </SuspenseWrapper>
       ),
     },

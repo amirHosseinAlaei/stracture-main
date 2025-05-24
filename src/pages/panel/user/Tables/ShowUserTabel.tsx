@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import TabelContainer from "../../../components/commoen/TableContainer";
-import getUsers from "../../../service/getUserTabel";
+import TabelContainer from "../../../../components/commoen/TableContainer";
+import getUsers from "../../../../service/getUserTabel";
 import {
   SafetyCertificateOutlined,
   LockOutlined,
@@ -11,13 +11,25 @@ import {
   DeleteOutlined,
   ExclamationCircleFilled,
 } from "@ant-design/icons";
-import PortalButton from "../../../components/commoen/portallButton";
-import { Breadcrumb, Button, message, Modal } from "antd";
-import PortalBreadcrumb from "../../../components/commoen/ProtalBreadcrumb";
-import { apiDeleteUser } from "../../../service/userService";
+import PortalButton from "../../../../components/commoen/portallButton";
+import { Breadcrumb, Button, Modal } from "antd";
+import PortalBreadcrumb from "../../../../components/commoen/ProtalBreadcrumb";
+import { apiDeleteUser } from "../../../../service/userService";
+import { toast } from "react-hot-toast";
 
 interface ShowUserTabelProps {
   setButtonText?: (text: string) => void;
+}
+
+interface User {
+  id: string;
+  userName: string;
+  firstName?: string;
+  lastName?: string;
+  mobile?: string;
+  type?: string;
+  status?: string;
+  twoFactorEnabled?: boolean;
 }
 
 const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
@@ -35,7 +47,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
 
   // استیت‌های مدال حذف
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
@@ -74,32 +86,28 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
 
   const queryClient = useQueryClient();
 
-  // حذف کاربر با نتیجه تست بار (toast)
+  // حذف کاربر با نتیجه toast داینامیک
   const deleteMutation = useMutation({
     mutationFn: apiDeleteUser,
     onSuccess: () => {
-      message.success({
-        content: "حذف موفقیت‌آمیز بود.",
-        duration: 3,
-        style: { direction: "rtl" }
-      });
+      if (userToDelete) {
+        toast.success(`کاربر ${userToDelete.userName} حذف شد.`);
+      } else {
+        toast.success("حذف موفقیت‌آمیز بود.");
+      }
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setDeleteModalVisible(false);
       setUserToDelete(null);
     },
     onError: (error: any) => {
-      message.error({
-        content: error?.response?.data?.message || "حذف با خطا مواجه شد.",
-        duration: 4,
-        style: { direction: "rtl" }
-      });
+      toast.error(error?.response?.data?.message || "حذف با خطا مواجه شد.");
       setDeleteModalVisible(false);
       setUserToDelete(null);
     },
   });
 
   // باز کردن مدال حذف
-  const handleDelete = (item: any) => {
+  const handleDelete = (item: User) => {
     setUserToDelete(item);
     setDeleteModalVisible(true);
   };
@@ -139,32 +147,32 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       icon: <SafetyCertificateOutlined />,
       title: "امنیت",
       description: "تنظیمات امنیتی",
-      onClick: (item: any) => alert(`Security clicked for ${item.id}`),
+      onClick: (item: User) => alert(`Security clicked for ${item.id}`),
     },
     {
       icon: <LockOutlined />,
       title: "تغییر وضعیت",
       description: "قفل یا بازکردن وضعیت",
-      onClick: (item: any) => alert(`Change status clicked for ${item.id}`),
+      onClick: (item: User) => alert(`Change status clicked for ${item.id}`),
     },
     {
       icon: <EyeOutlined />,
       title: "مشاهده",
       description: "مشاهده جزئیات",
-      onClick: (item: any) => alert(`View clicked for ${item.id}`),
+      onClick: (item: User) => alert(`View clicked for ${item.id}`),
     },
     {
       icon: <EditOutlined />,
       title: "ویرایش",
       description: "ویرایش اطلاعات",
-      onClick: (item: any) => nav(`/panel/users/edit/${item.id}`),
+      onClick: (item: User) => nav(`/panel/users/edit/${item.id}`),
     },
     {
       icon: <DeleteOutlined />,
       title: "حذف",
       description: "حذف آیتم",
       red: true,
-      onClick: (item: any) => handleDelete(item),
+      onClick: (item: User) => handleDelete(item),
     },
   ];
 
@@ -211,7 +219,6 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
         actionButtons={actionButtons}
       />
 
-      {/* مدال تایید حذف بهبود یافته بدون بک‌گراند قرمز */}
       <Modal
         title={
           <span style={{ color: "#cf1322", display: "flex", alignItems: "center", gap: 8 }}>
@@ -230,9 +237,8 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
         centered
       >
         <p style={{ fontSize: 16, fontWeight: "bold", color: "#cf1322", textAlign: "center" }}>
-          آیا مطمئن هستید که می‌خواهید کاربر 
-          <span style={{ color: "#000", margin: "0 5px" }}>{userToDelete?.userName}</span> 
-          را حذف کنید؟
+          آیا مطمئن هستید که می‌خواهید کاربر{" "}
+          <span style={{ color: "#000", margin: "0 5px" }}>{userToDelete?.userName}</span> را حذف کنید؟
         </p>
       </Modal>
     </>

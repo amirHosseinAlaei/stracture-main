@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Typography, Breadcrumb } from "antd";
 import { UndoOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import getUserById, { apiPostUser, apiUpdateUser } from "../../../../service/userService";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -13,16 +13,14 @@ import {
   validateImageFiles,
 } from "../../../../utils/formHellper";
 
-
 import ImageUploadSection from "./ImageUploadSection";
 import SystemInfoSection from "./SystemInfoSection";
 import GeneralInfoSection from "./GeneralInfoSection";
 import PortalButton from "../../../../components/commoen/portallButton";
 
-
-
-const GeneralInfoFormWithDrawer = () => {
+const FormContainer  = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["users", id],
     queryFn: () => getUserById(id),
@@ -44,7 +42,6 @@ const GeneralInfoFormWithDrawer = () => {
   useEffect(() => {
     if (data) {
       form.setFieldsValue(data);
-      // مقداردهی اولیه عکس و امضا اگر لازم بود
     }
   }, [data, form]);
 
@@ -58,6 +55,8 @@ const GeneralInfoFormWithDrawer = () => {
     onSuccess: () => {
       toast.success("اطلاعات با موفقیت ارسال شد");
       onReset();
+      queryClient.invalidateQueries(["users"]);
+      nav(-1); 
     },
     onError: (error) => {
       toast.error(error?.response?.data?.message || "ارسال اطلاعات با خطا مواجه شد");
@@ -69,6 +68,7 @@ const GeneralInfoFormWithDrawer = () => {
     onSuccess: () => {
       toast.success("اطلاعات با موفقیت ارسال شد");
       onReset();
+      queryClient.invalidateQueries(["users"]); nav(-1);
     },
     onError: (error) => {
       toast.error(error?.response?.data?.message || "ارسال اطلاعات با خطا مواجه شد");
@@ -162,8 +162,8 @@ const GeneralInfoFormWithDrawer = () => {
             onlyNumbers={onlyNumbers}
             validateNationalCode={validateNationalCode}
           />
-          <div className="flex items-center my-5 gap-4">
-            <Typography.Title level={4} className="m-0 pr-2">
+          <div className="flex  items-center my-5 gap-4">
+            <Typography.Title level={5} className="m-0 pr-2">
               اطلاعات سامانه
             </Typography.Title>
             <div className="flex-grow h-px bg-gray-300" />
@@ -177,7 +177,7 @@ const GeneralInfoFormWithDrawer = () => {
           />
           <Driverguide />
           <div className="flex items-center my-5 gap-4">
-            <Typography.Title level={4} className="m-0 pr-2">
+            <Typography.Title level={5} className="m-0 pr-2">
               بارگذاری تصویر
             </Typography.Title>
             <div className="flex-grow h-px bg-gray-300" />
@@ -242,18 +242,14 @@ const GeneralInfoFormWithDrawer = () => {
         </Breadcrumb>
       </PortalBreadcrumb>
 
-
-<PortalButton>
-  <Button onClick={() => nav(-1)}>
-    برگشت
-    <i className="fa-duotone fa-arrow-left me-2"></i>
-  </Button>
-</PortalButton>
-
-
-      
+      <PortalButton>
+        <Button onClick={() => nav(-1)}>
+          برگشت
+          <i className="fa-duotone fa-arrow-left me-2"></i>
+        </Button>
+      </PortalButton>
     </div>
   );
 };
 
-export default GeneralInfoFormWithDrawer;
+export default FormContainer ;
