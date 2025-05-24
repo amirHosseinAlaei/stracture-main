@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import Loading from "../components/commoen/Loading"; // اصلاح نام
-import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUser";
+import GeneralInfoForm from "../pages/panel/user/form/FormAddEditUserContiner";
 import PanelLayout from "../layout/PanlLayout";
 
 const PanelDashboard = lazy(

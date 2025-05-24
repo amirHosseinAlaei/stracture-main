@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import TabelContainer from "../../../components/commoen/TableContainer";
 import getUsers from "../../../service/getUserTabel";
@@ -9,10 +9,12 @@ import {
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
+  ExclamationCircleFilled,
 } from "@ant-design/icons";
 import PortalButton from "../../../components/commoen/portallButton";
-import { Breadcrumb, Button } from "antd";
+import { Breadcrumb, Button, message, Modal } from "antd";
 import PortalBreadcrumb from "../../../components/commoen/ProtalBreadcrumb";
+import { apiDeleteUser } from "../../../service/userService";
 
 interface ShowUserTabelProps {
   setButtonText?: (text: string) => void;
@@ -31,7 +33,10 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
   const [pageIndex, setPageIndex] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  // sync شدن state ها با URL (وقتی URL دستی تغییر کند)
+  // استیت‌های مدال حذف
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
+
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
     const urlPage = parseInt(searchParams.get("page") || "1", 10);
@@ -43,7 +48,6 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
     setPageSize(urlPageSize);
   }, [searchParams]);
 
-  // فقط وقتی search یا صفحه‌بندی تغییر کرد، URL را با replace آپدیت کن
   useEffect(() => {
     setSearchParams(
       {
@@ -51,7 +55,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
         pageSize: pageSize.toString(),
         search: search,
       },
-      { replace: true } // ✅ استفاده از replace برای جلوگیری از ثبت در history
+      { replace: true }
     );
   }, [pageIndex, pageSize, search, setSearchParams]);
 
@@ -67,6 +71,51 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
     retry: 1,
     keepPreviousData: true,
   });
+
+  const queryClient = useQueryClient();
+
+  // حذف کاربر با نتیجه تست بار (toast)
+  const deleteMutation = useMutation({
+    mutationFn: apiDeleteUser,
+    onSuccess: () => {
+      message.success({
+        content: "حذف موفقیت‌آمیز بود.",
+        duration: 3,
+        style: { direction: "rtl" }
+      });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
+    onError: (error: any) => {
+      message.error({
+        content: error?.response?.data?.message || "حذف با خطا مواجه شد.",
+        duration: 4,
+        style: { direction: "rtl" }
+      });
+      setDeleteModalVisible(false);
+      setUserToDelete(null);
+    },
+  });
+
+  // باز کردن مدال حذف
+  const handleDelete = (item: any) => {
+    setUserToDelete(item);
+    setDeleteModalVisible(true);
+  };
+
+  // تایید حذف
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      deleteMutation.mutate(userToDelete.id);
+    }
+  };
+
+  // بستن مدال حذف
+  const handleCancelDelete = () => {
+    setDeleteModalVisible(false);
+    setUserToDelete(null);
+  };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -115,7 +164,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
       title: "حذف",
       description: "حذف آیتم",
       red: true,
-      onClick: (item: any) => alert(`Delete clicked for ${item.id}`),
+      onClick: (item: any) => handleDelete(item),
     },
   ];
 
@@ -131,8 +180,7 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
           onClick={() => nav("/panel/users/add")}
         >
           افزودن کاربر جدید
-          <i className="fas fa-user-plus text-white"></i>{" "}
-          {/* آیکون "user-plus" از نسخه پرو */}
+          <i className="fas fa-user-plus text-white"></i>
         </Button>
       </PortalButton>
 
@@ -162,6 +210,31 @@ const ShowUserTabel: React.FC<ShowUserTabelProps> = ({ setButtonText }) => {
         setPageSize={setPageSize}
         actionButtons={actionButtons}
       />
+
+      {/* مدال تایید حذف بهبود یافته بدون بک‌گراند قرمز */}
+      <Modal
+        title={
+          <span style={{ color: "#cf1322", display: "flex", alignItems: "center", gap: 8 }}>
+            <ExclamationCircleFilled style={{ fontSize: 24 }} />
+            تایید حذف کاربر
+          </span>
+        }
+        open={deleteModalVisible}
+        onOk={handleConfirmDelete}
+        confirmLoading={deleteMutation.isLoading}
+        onCancel={handleCancelDelete}
+        okText="بله، حذف شود"
+        cancelText="خیر"
+        okButtonProps={{ danger: true, style: { fontWeight: "bold" } }}
+        cancelButtonProps={{ style: { fontWeight: "bold" } }}
+        centered
+      >
+        <p style={{ fontSize: 16, fontWeight: "bold", color: "#cf1322", textAlign: "center" }}>
+          آیا مطمئن هستید که می‌خواهید کاربر 
+          <span style={{ color: "#000", margin: "0 5px" }}>{userToDelete?.userName}</span> 
+          را حذف کنید؟
+        </p>
+      </Modal>
     </>
   );
 };

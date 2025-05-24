@@ -52,16 +52,19 @@ const AllowedIPInput = () => {
             placeholder="IP جدید"
           />
         ) : (
-          <Tooltip title="افزودن IP جدید">
-            <Button
-              type="dashed"
-              size="small"
-              shape="circle"
-              icon={<PlusOutlined />}
-              onClick={() => setInputVisible(true)}
-              className="border-blue-400 text-blue-500 hover:text-white hover:bg-blue-500 transition"
-            />
-          </Tooltip>
+          
+   <Tooltip title="افزودن IP جدید" visible={inputVisible} 
+             onClick={() => setInputVisible(!inputVisible)} 
+             className={`tooltip ${inputVisible ? 'fade-in' : 'fade-out'}`}>
+      <Button
+        type="dashed"
+        size="small"
+        icon={<i className="fal fa-add !font-bold"></i>}
+        onClick={() => setInputVisible(true)}
+        className="border-blue-400 !h-8 !w-8 !rounded-lg !text-center !duration-300 !items-center !justify-center !flex hover:text-white hover:bg-blue-500 transition"
+      />
+    </Tooltip>
+
         )}
       </div>
     </div>
